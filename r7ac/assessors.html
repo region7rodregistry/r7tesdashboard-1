@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Competency Assessors</title>
+    <link rel="icon" type="image/png" href="../icons/t7ilogo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Fade-in animation */
+        body {
+            opacity: 0; /* Start invisible */
+            transition: opacity 3s ease-in; /* Transition effect */
+        }
+
+        body.fade-in {
+            opacity: 1; /* Fully visible */
+        }
+
+        .glowing-button {
+            position: relative;
+            overflow: hidden;
+            border: 2px solid orange; /* Orange border */
+            transition: box-shadow 0.3s ease;
+        }
+
+        .glowing-button:hover {
+            box-shadow: 0 0 10px orange, 0 0 20px orange, 0 0 30px orange; /* Glowing effect */
+        }
+
+        /* New styles for the Recently Expired button */
+        .expired-button {
+            border: 2px solid red; /* Red border */
+            animation: running-red-outline 1.5s infinite; /* Running outline animation */
+        }
+
+        @keyframes running-red-outline {
+            0% {
+                box-shadow: 0 0 0 red; /* No shadow */
+            }
+            50% {
+                box-shadow: 0 0 5px red; /* Subtle shadow */
+            }
+            100% {
+                box-shadow: 0 0 0 red; /* No shadow */
+            }
+        }
+
+        /* New styles for the glowing orange effect */
+        .glowing-orange-button {
+            border: 2px solid rgb(255, 145, 0); /* Red border */
+            animation: running-red-outline 1.5s infinite; /
+        }
+        @keyframes running-red-outline {
+            0% {
+                box-shadow: 0 0 0 rgb(255, 166, 0); /* No shadow */
+            }
+            50% {
+                box-shadow: 0 0 5px rgb(255, 153, 0); /* Subtle shadow */
+            }
+            100% {
+                box-shadow: 0 0 0 rgb(255, 153, 0); /* No shadow */
+            }
+        }
+
+        /* Add this CSS for smooth transition */
+        tbody tr {
+            transition: opacity 0.5s ease; /* Smooth transition for table rows */
+        }
+    </style>
+</head>
+<body class="fade-in">
+<div class="header-container">
+    <div class="header-top">
+        <img src="../icons/tlogo.png" alt="Left Logo" class="logo">
+        <h1 class="header-title">TESDA COMPETENCY ASSESSORS</h1>
+        <img src="../icons/blogo.png" alt="Right Logo" class="logo">
+    </div>
+    <div class="button-container">
+        <button onclick="window.location.href='../index.html'" class="action-button">Home</button>
+        <button onclick="window.location.href='statistics2.html'" class="action-button">Statistics</button>
+        <button onclick="window.location.href='list2.html'" class="action-button">List</button>
+        <button onclick="window.location.href='assessors_convert.html'" class="action-button">Convert Excel</button>
+        <button onclick="window.location.href='../r7nttc2/form.html'" class="action-button">Assessor's Profile (Coming Soon)</button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- New Entry Count Display -->
+    <div id="entryCount" class="entry-count"></div>
+    <!-- Date Subheader -->
+    <div class="date-subheader">
+        Current Competency Assessors as of: <span id="currentDate"></span>
+    </div>
+
+    <!-- Search Input Field -->
+    <div class="search-container">
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" placeholder="Search records..." oninput="searchTable()">
+            <button id="searchButton" onclick="searchTable()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <div id="loadingMessage" style="display: none;">Loading data...</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Province</th>
+                <th>Name</th>
+                <th>Company Name</th>
+                <th>Qualification</th>
+                <th>Accreditation Number</th>
+                <th>Date of Accreditation</th>
+                <th>Validity</th>
+            </tr>
+        </thead>
+        <tbody id="data-table-body">
+            <!-- Data will be dynamically loaded here -->
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <span id="pagination"></span>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2024 Certificate Records Management System</p>
+        <div class="footer-links">
+            <a href="./index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="#"><i class="fas fa-info-circle"></i> About</a>
+            <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const entriesPerPage = 200;
+    let currentPage = 1;
+    let filteredData = [];
+    let originalData = [];
+    let debounceTimeout;
+
+    async function loadData() {
+        try {
+            const response = await fetch('data2.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            originalData = data;
+            filteredData = originalData;
+            renderTable();
+        } catch (error) {
+            console.error("Error loading data:", error);
+        }
+    }
+
+    function renderTable() {
+        const startIndex = (currentPage - 1) * entriesPerPage;
+        const paginatedData = filteredData.slice(startIndex, startIndex + entriesPerPage);
+        const tableBody = document.getElementById("data-table-body");
+        
+        // Fade out the table body before updating
+        tableBody.style.opacity = 0; // Start with invisible
+
+        setTimeout(() => {
+            tableBody.innerHTML = paginatedData.map(row => {
+                const validityDate = new Date(row.nttc_validity);
+                const today = new Date();
+                const threeMonthsFromNow = new Date();
+                threeMonthsFromNow.setMonth(today.getMonth() + 3);
+                
+                let validityColor = 'green';
+                if (validityDate < today) {
+                    validityColor = 'red';
+                } else if (validityDate <= threeMonthsFromNow) {
+                    validityColor = 'orange';
+                }
+
+                return `
+                    <tr>
+                        <td><a href="view_record.html?id=${encodeURIComponent(row.id)}" class="record-link">${row.B || ''}</a></td>
+                        <td><a href="view_record.html?id=${encodeURIComponent(row.id)}" class="record-link">${row.C || ''}</a></td>
+                        <td><a href="view_record.html?id=${encodeURIComponent(row.id)}" class="record-link">${row.I || ''}</a></td>
+                         <td><a href="view_record.html?id=${encodeURIComponent(row.id)}" class="record-link">${row.K || ''}</a></td>
+                          <td><a href="view_record.html?id=${encodeURIComponent(row.id)}" class="record-link">${row.L || ''}</a></td>
+                           <td><a href="view_record.html?id=${encodeURIComponent(row.id)}" class="record-link">${formatDate(row.M) || ''}</a></td>
+                            <td><a href="view_record.html?id=${encodeURIComponent(row.id)}" class="record-link" style="color: ${validityColor}">${formatDate(row.N) || ''}</a></td>
+                        
+                        
+                    </tr>
+                `;
+            }).join("");
+
+            // Fade in the table body after updating
+            tableBody.style.opacity = 1; // Make it visible again
+        }, 100); // Delay to allow fade out effect
+        
+        renderPagination();
+        document.getElementById("entryCount").textContent = `Total Entries: ${filteredData.length}`;
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredData.length / entriesPerPage);
+        const pagination = document.getElementById("pagination");
+        let paginationHTML = '';
+
+        paginationHTML += `<a href="#" class="page-link ${currentPage === 1 ? 'disabled' : ''}" 
+            onclick="setPage(${currentPage - 1})">Previous</a>`;
+
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `<a href="#" class="page-link ${i === currentPage ? 'active' : ''}" 
+                onclick="setPage(${i})">${i}</a>`;
+        }
+
+        paginationHTML += `<a href="#" class="page-link ${currentPage === totalPages ? 'disabled' : ''}" 
+            onclick="setPage(${currentPage + 1})">Next</a>`;
+
+        pagination.innerHTML = paginationHTML;
+    }
+
+    function setPage(page) {
+        currentPage = page;
+        renderTable();
+    }
+
+    function searchTable() {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+            const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+            filteredData = originalData.filter(row =>
+                ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']
+                .some(column => row[column] && row[column].toString().toLowerCase().includes(searchTerm))
+            );
+            currentPage = 1;
+            renderTable();
+        }, 300);
+    }
+
+    loadData();
+
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString; // Return original string if invalid date
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    }
+
+    // Add this line to trigger the fade-in effect after the content is loaded
+    window.onload = () => {
+        document.body.classList.add('fade-in');
+    };
+</script>
+
+<style>
+.pagination {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.page-link {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+}
+
+.page-link.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.page-link.disabled {
+    pointer-events: none;
+    color: #ccc;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 50px;
+    padding: 5px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.search-wrapper input {
+    border: none;
+    background: none;
+    outline: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    width: 100%;
+    color: #495057;
+    font-weight: 500;
+    border-radius: 50px;
+}
+
+.search-wrapper button {
+    border: none;
+    background: #007bff;
+    color: white;
+    padding: 0 15px;
+    height: 36px;
+    cursor: pointer;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.record-link {
+    color: black;
+    text-decoration: none;
+}
+
+.record-link:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Centering and styling for the entry count and date subheader */
+.entry-count, .date-subheader {
+    text-align: center; /* Center the text */
+    font-size: 18px; /* Increase font size */
+    margin: 10px 0; /* Add some margin */
+    color: #333; /* Darker color for better visibility */
+}
+</style>
+</body>
+</html>

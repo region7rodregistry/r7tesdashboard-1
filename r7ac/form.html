@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competency Assessor's Accreditation</title>
+    <link rel="stylesheet" href="styles2.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Application Form</h1>
+        <h2>Competency Assessor's Accreditation</h2>
+        <form id="applicationForm">
+            <div class="form-group">
+                <label for="sector">Sector:</label>
+                <input type="text" id="sector" name="sector" required>
+            </div>
+
+            <div class="form-group">
+                <label for="qualification">Title of Qualification:</label>
+                <input type="text" id="qualification" name="qualification" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="middleInitial">MI:</label>
+                <input type="text" id="middleInitial" name="middleInitial">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Complete Address:</label>
+                <textarea id="address" name="address" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dateOfBirth">Date of Birth (mm/dd/yyyy):</label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+            </div>
+
+            <div class="form-group">
+                <label for="placeOfBirth">Place of Birth:</label>
+                <input type="text" id="placeOfBirth" name="placeOfBirth" required>
+            </div>
+
+            <div class="form-group">
+                <label for="height">Height (m):</label>
+                <input type="number" id="height" name="height" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label for="weight">Weight (kg):</label>
+                <input type="number" id="weight" name="weight">
+            </div>
+
+            <div class="form-group">
+                <label for="employer">Employer / Company:</label>
+                <input type="text" id="employer" name="employer">
+            </div>
+
+            <div class="form-group">
+                <label for="telNo">Tel. No:</label>
+                <input type="tel" id="telNo" name="telNo">
+            </div>
+
+            <div class="form-group">
+                <label for="designation">Position/Designation:</label>
+                <input type="text" id="designation" name="designation">
+            </div>
+
+            <div class="form-group">
+                <label for="yearsInPosition">No. of years in the position:</label>
+                <input type="number" id="yearsInPosition" name="yearsInPosition">
+            </div>
+
+            <div class="form-group">
+                <label for="yearsInIndustry">No. of years in industry:</label>
+                <input type="number" id="yearsInIndustry" name="yearsInIndustry">
+            </div>
+
+            <fieldset>
+                <legend>Sex:</legend>
+                <input type="radio" id="male" name="sex" value="Male" required>
+                <label for="male">Male</label>
+                <input type="radio" id="female" name="sex" value="Female">
+                <label for="female">Female</label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Civil Status:</legend>
+                <input type="radio" id="single" name="civilStatus" value="Single" required>
+                <label for="single">Single</label>
+                <input type="radio" id="married" name="civilStatus" value="Married">
+                <label for="married">Married</label>
+                <input type="radio" id="widower" name="civilStatus" value="Widower">
+                <label for="widower">Widower</label>
+                <input type="radio" id="separated" name="civilStatus" value="Separated">
+                <label for="separated">Separated</label>
+            </fieldset>
+
+            <div class="form-group">
+                <label for="contactNumbers">Contact Number(s):</label>
+                <input type="tel" id="contactNumbers" name="contactNumbers" required>
+            </div>
+
+            <div class="form-group">
+                <label for="educationalAttainment">Highest Educational Attainment:</label>
+                <select id="educationalAttainment" name="educationalAttainment" required>
+                    <option value="">Select...</option>
+                    <option value="TVET graduate">TVET graduate</option>
+                    <option value="College level">College level</option>
+                    <option value="College graduate">College graduate</option>
+                    <option value="Post graduate">Post graduate</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="employmentStatus">Employment Status:</label>
+                <select id="employmentStatus" name="employmentStatus" required>
+                    <option value="">Select...</option>
+                    <option value="Casual">Casual</option>
+                    <option value="Permanent">Permanent</option>
+                    <option value="Contractual">Contractual</option>
+                    <option value="Self-employed">Self-employed</option>
+                </select>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

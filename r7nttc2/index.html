@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online NTTC Status System</title>
+    <link rel="icon" href="../icons/t7logo.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000000, #0a2472, #000000);
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        footer {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            text-align: center;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
+            width: 35%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+        h1{
+            margin-bottom: 1.5rem;
+            color: #00ff00;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #2bff00;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        form {
+            display: grid;
+            gap: 1.5rem;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: #ffffff;
+        }
+        input {
+            width: 95%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px #00ff00;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        button {
+            padding: 0.75rem;
+            background-color: #004cff;
+            color: #000000;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        button::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: #00ffff;
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        button:hover::before {
+            opacity: 1;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px #00ffff;
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .loader {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .loader span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin: 0 5px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: bounce 1s infinite;
+        }
+        .loader span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loader span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #000000, #0a2472, #000000);
+            margin: 10% auto;
+            padding: 2rem;
+            border: 1px solid #00ff00;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
+        }
+        .close {
+            color: #ffffff;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close:hover {
+            color: #00ffff;
+        }
+        .slide-button {
+            background-color: #00ff00;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .slide-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px #00ffff;
+        }
+        .slide-button:active {
+            transform: translateY(0);
+        }
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px;
+            }
+            .container {
+                padding: 1.5rem;
+                width: 90%;
+                max-width: 400px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            input, button {
+                font-size: 1rem;
+                padding: 0.5rem;
+            }
+            .modal-content {
+                width: 80%;
+                margin: 5% auto;
+                padding: 1.5rem;
+            }
+        }
+        @media (max-width: 480px) {
+            main {
+                padding: 1rem;
+            }
+            .container {
+                padding: 1rem;
+                width: 90%;
+                max-width: 350px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+            }
+            input, button {
+                font-size: 0.9rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="container">
+            <form id="nttcForm" aria-labelledby="nttcFormTitle">
+                <img src="../icons/t7ilogo.png" alt="Logo" style="display: block; margin: 0 auto; max-width: 25%; height: auto;">
+                <h2 id="nttcFormTitle"> NTTC Status</h2>
+                <div>
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" id="lastName" name="lastName" required placeholder="Enter your last name">
+                </div>
+                <div>
+                    <label for="firstName">First Name:</label>
+                    <input type="text" id="firstName" name="firstName" required placeholder="Enter your first name">
+                </div>
+                <div>
+                    <label for="extension">Extension:</label>
+                    <input type="text" id="extension" name="extension" placeholder="Enter name extension (if any)">
+                </div>
+                <div>
+                    <label for="middleInitial">Middle Initial:</label>
+                    <input type="text" id="middleInitial" name="middleInitial" maxlength="1" placeholder="Enter middle initial">
+                </div>
+                <div>
+                    <label for="dateOfBirth">Date of Birth:</label>
+                    <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                </div>
+                <button type="submit" aria-label="Submit form">Check Status</button>
+            </form>
+
+            <div class="loader" id="loader">
+                <span></span><span></span><span></span>
+            </div>
+
+            <div id="result" style="display: none;"></div>
+        </div>
+    </main>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>NTTC Status</h2>
+            <div id="modalSlides"></div>
+            <div style="text-align: center; margin-top: 1rem;">
+                <button id="prevSlide" class="slide-button">❮ Previous</button>
+                <button id="nextSlide" class="slide-button">Next ❯</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 Online NTTC Status System. All rights reserved.
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('nttcForm');
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                loader.style.display = 'block';
+                resultDiv.style.display = 'none';
+
+                const formData = {
+                    lastName: document.getElementById('lastName').value.trim().toUpperCase(),
+                    firstName: document.getElementById('firstName').value.trim().toUpperCase(),
+                    middleInitial: document.getElementById('middleInitial').value.trim().toUpperCase(),
+                    extension: document.getElementById('extension').value.trim().toUpperCase(),
+                    dateOfBirth: formatDateForComparison(document.getElementById('dateOfBirth').value)
+                };
+
+                try {
+                    const response = await fetch('data.json');
+                    if (!response.ok) throw new Error(`Failed to fetch data. Status: ${response.status}`);
+
+                    const data = await response.json();
+                    
+                    const results = data.filter(entry => {
+                        const matchesName = entry.C.toUpperCase() === formData.lastName;
+                        
+                        const entryDOB = entry.G;
+                        const matchesDOB = entryDOB === formData.dateOfBirth;
+                        
+                        return matchesName && matchesDOB;
+                    });
+
+                    if (results.length > 0) {
+                        showModal(results);
+                    } else {
+                        resultDiv.innerHTML = '<p>No matching records found.</p>';
+                        resultDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    resultDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+                    resultDiv.style.display = 'block';
+                } finally {
+                    loader.style.display = 'none';
+                }
+            });
+        });
+
+        function showModal(results) {
+            const modalSlides = document.getElementById('modalSlides');
+            modalSlides.innerHTML = '';
+
+            results.forEach(result => {
+                const validityDate = new Date(result.AD);
+                const currentDate = new Date();
+                const threeMonthsFromNow = new Date();
+                threeMonthsFromNow.setMonth(currentDate.getMonth() + 3);
+
+                let statusText = 'Active';
+                let statusColor = 'green';
+
+                if (validityDate < currentDate) {
+                    statusText = 'Expired';
+                    statusColor = 'red';
+                } else if (validityDate <= threeMonthsFromNow) {
+                    statusText = 'Expiring Soon';
+                    statusColor = 'orange';
+                }
+
+                modalSlides.innerHTML += `
+                    <div class="modal-slide">
+                        <p><strong>Region:</strong> ${result.A}</p>
+                        <p><strong>Province:</strong> ${result.B}</p>
+                        <p><strong>Name:</strong> ${result.C}, ${result.D} ${result.E || ''} ${result.F || ''}</p>
+                        <p><strong>Qualification:</strong> ${result.R}</p>
+                        <p><strong>Certificate Number:</strong> ${result.AB}</p>
+                        <p><strong>Control Number:</strong> ${result.AE}</p>
+                        <p><strong>Date of Issuance:</strong> ${formatDate(result.AC)}</p>
+                        <p><strong>Valid Until:</strong> ${formatDate(result.AD)}</p>
+                        <p><strong>Type:</strong> ${result.AF}</p>
+                        <p style="color: ${statusColor};"><strong>Status:</strong> ${statusText}</p>
+                    </div>`;
+            });
+
+            document.getElementById('resultModal').style.display = 'block';
+            currentSlide = 0;
+            showSlide(currentSlide);
+        }
+
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.modal-slide');
+            slides.forEach((slide, i) => {
+                slide.style.display = (i === index) ? 'block' : 'none';
+            });
+        }
+
+        document.getElementById('prevSlide').onclick = function() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        };
+
+        document.getElementById('nextSlide').onclick = function() {
+            const slides = document.querySelectorAll('.modal-slide');
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        };
+
+        document.getElementById('closeModal').onclick = function() {
+            document.getElementById('resultModal').style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('resultModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        function formatDateForComparison(dateString) {
+            const date = new Date(dateString);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}/${day}/${year}`;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const [month, day, year] = dateString.split('/');
+            return `${month}/${day}/${year}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="/icons/t7logo.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify JSON Data</title>
+    <script>
+        async function loadData() {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            document.getElementById('jsonData').value = JSON.stringify(data, null, 2);
+        }
+
+        async function modifyData() {
+            const newData = document.getElementById('jsonData').value;
+
+            // Send the modified data to the server
+            await fetch('/saveData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: newData })
+            });
+
+            alert('Data modified successfully!');
+        }
+
+        window.onload = loadData;
+    </script>
+</head>
+<body>
+    <h1>Modify JSON Data</h1>
+    <textarea id="jsonData" rows="20" cols="50"></textarea><br>
+    <button onclick="modifyData()">Save Changes</button>
+</body>
+</html>

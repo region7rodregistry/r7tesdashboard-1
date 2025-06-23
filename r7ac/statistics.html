@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ACMIS</title>
+    <link rel="icon" type="image/png" href="../icons/tlogo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stats-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .stats-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-count {
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        #error-message {
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body class="fade-in">
+<div class="header-container">
+    <div class="header-top">
+        <img src="../icons/tlogo.png" alt="Left Logo" class="logo">
+        <h1 class="header-title">ACCREDITED ASSESSMENT CENTERS RECORDS</h1>
+        <img src="../icons/blogo.png" alt="Right Logo" class="logo">
+    </div>
+    <div class="button-container">
+        <button onclick="window.location.href='../index.html'" class="action-button">Home</button>
+        <button onclick="window.location.href='upload.html'" class="action-button">Upload Data</button>
+        <button onclick="window.location.href='convert.html'" class="action-button">Convert Excel</button>
+        <button class="action-button">Export Data</button>
+        <button onclick="window.location.href='statistics.html'" class="action-button">Statistics</button>
+    </div>
+</div>
+
+<div class="container">
+    <h1 class="stats-title">Statistics</h1>
+    <div id="loading" class="loading">Loading data...</div>
+    <div id="error-message"></div>
+    <div class="stats-grid">
+        <div class="stats-card">
+            <h2>Qualifications</h2>
+            <ul id="qualifications-list" class="stats-list"></ul>
+        </div>
+        <div class="stats-card">
+            <h2>Sectors</h2>
+            <ul id="sectors-list" class="stats-list"></ul>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2024 Certificate Records Management System</p>
+        <div class="footer-links">
+            <a href="./index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="#"><i class="fas fa-info-circle"></i> About</a>
+            <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const entriesPerPage = 200;
+    let currentPage = 1;
+    let filteredData = [];
+    let originalData = [];
+
+    async function loadData() {
+        try {
+            const response = await fetch('data.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (!Array.isArray(data)) {
+                throw new Error('Invalid data format');
+            }
+            originalData = data.filter(row => row && (row.D || row.E));
+            filteredData = originalData;
+            renderTable();
+        } catch (error) {
+            console.error("Error loading data:", error);
+            originalData = [];
+            filteredData = [];
+            renderTable();
+        }
+    }
+
+    function renderTable() {
+        const startIndex = (currentPage - 1) * entriesPerPage;
+        const paginatedData = filteredData.slice(startIndex, startIndex + entriesPerPage);
+        const tableBody = document.getElementById("data-table-body");
+        
+        tableBody.innerHTML = paginatedData.map(row => {
+            // Parse the validity date
+            const validityDate = new Date(row.V);
+            const today = new Date();
+            const threeMonthsFromNow = new Date();
+            threeMonthsFromNow.setMonth(today.getMonth() + 3);
+            
+            // Determine the validity status and color
+            let validityColor = 'green'; // Active dates are green
+            if (validityDate < today) {
+                validityColor = 'red'; // Expired
+            } else if (validityDate <= threeMonthsFromNow) {
+                validityColor = 'orange'; // Expiring soon (within 3 months)
+            }
+
+            return `
+                <tr>
+                    <td>${row.B || ''}</td>
+                    <td>${row.C || ''}</td>
+                    <td>${row.G || ''}</td>
+                    <td>${row.I || ''}</td>
+                    <td>${row.J || ''}</td>
+                    <td>${row.K || ''}</td>
+                    <td>${formatDate(row.L) || ''}</td>
+                    <td style="color: ${validityColor}">${formatDate(row.M) || ''}</td>
+                </tr>
+            `;
+        }).join("");
+        renderPagination();
+        // Update entry count display
+        document.getElementById("entryCount").textContent = `Total Entries: ${filteredData.length}`;
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredData.length / entriesPerPage);
+        const pagination = document.getElementById("pagination");
+        let paginationHTML = '';
+
+        paginationHTML += `<a href="#" class="page-link ${currentPage === 1 ? 'disabled' : ''}" 
+            onclick="setPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</a>`;
+
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `<a href="#" class="page-link ${i === currentPage ? 'active' : ''}" 
+                onclick="setPage(${i})">${i}</a>`;
+        }
+
+        paginationHTML += `<a href="#" class="page-link ${currentPage === totalPages ? 'disabled' : ''}" 
+            onclick="setPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</a>`;
+
+        pagination.innerHTML = paginationHTML;
+    }
+
+    function setPage(page) {
+        currentPage = page;
+        renderTable();
+    }
+
+    function searchTable() {
+        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+        filteredData = originalData.filter(row =>
+            Object.values(row).some(value => value && value.toString().toLowerCase().includes(searchTerm))
+        );
+        currentPage = 1; 
+        renderTable();
+    }
+
+    loadData();
+
+    // Add this after loadData();
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    // Trigger fade-in effect after the page loads
+    window.onload = function() {
+        document.body.classList.add('visible');
+    };
+
+    // Add this function to format the date
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-US', options);
+    }
+
+    // Function to count occurrences of items in an array
+    function countOccurrences(arr) {
+        const counts = {};
+        arr.forEach(item => {
+            counts[item] = (counts[item] || 0) + 1;
+        });
+        return counts;
+    }
+
+    // Function to create list items with counts
+    function createListItems(data, elementId) {
+        const list = document.getElementById(elementId);
+        Object.entries(data)
+            .sort(([,a], [,b]) => b - a) // Sort by count
+            .forEach(([item, count]) => {
+                const li = document.createElement('li');
+                li.className = 'stats-item';
+                li.innerHTML = `
+                    <span>${item}</span>
+                    <span class="stats-count">${count}</span>
+                `;
+                list.appendChild(li);
+            });
+    }
+
+    // Load and process data
+    try {
+        // For testing with sample data (remove this in production)
+        const sampleData = [
+            { qualification: "Bachelor's", sector: "Technology" },
+            { qualification: "Master's", sector: "Healthcare" },
+            { qualification: "Bachelor's", sector: "Technology" },
+            // Add more sample data as needed
+        ];
+        displayStats(sampleData);
+
+        // Uncomment this section when you have real data.json
+        /*
+        fetch('data.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayStats(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('error-message').textContent = 
+                    'Error loading data. Please try again later.';
+                document.getElementById('loading').style.display = 'none';
+            });
+        */
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('error-message').textContent = 
+            'Error processing data. Please try again later.';
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    function displayStats(data) {
+        // Extract and count qualifications and sectors
+        const qualifications = data.map(item => item.qualification || 'Unknown');
+        const sectors = data.map(item => item.sector || 'Unknown');
+
+        const qualificationCounts = countOccurrences(qualifications);
+        const sectorCounts = countOccurrences(sectors);
+
+        // Display qualifications
+        const qualList = document.getElementById('qualifications-list');
+        qualList.innerHTML = '';
+        createListItems(qualificationCounts, 'qualifications-list');
+
+        // Display sectors
+        const sectorList = document.getElementById('sectors-list');
+        sectorList.innerHTML = '';
+        createListItems(sectorCounts, 'sectors-list');
+
+        // Hide loading message
+        document.getElementById('loading').style.display = 'none';
+    }
+</script>
+
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a1a, #1e3c72, #2a5298);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 2300px;
+    margin: 0 auto;
+    background-color: rgba(134, 207, 236, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    background-color: rgb(220, 234, 245);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+th {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background-color: #f0f4f8;
+}
+
+/* Header styles */
+.header-container {
+    background: linear-gradient(to right, #0550dd, #000000);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    height: 80px;
+    width: auto;
+    margin: 0;
+}
+
+.header-title {
+    color: white;
+    text-align: center;
+    margin: 0;
+    flex-grow: 1;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.action-button {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    border: 2px solid white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+}
+
+.action-button:hover {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Footer styles */
+footer {
+    background: linear-gradient(to right, #1e50ac, #000000);
+    color: white;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #a8c0ff;
+    transform: translateY(-2px);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .header-top {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .logo {
+        height: 60px;
+    }
+
+    .header-title {
+        font-size: 1.2em;
+        text-align: center;
+        padding: 0 10px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .action-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* Additional styles for very small screens */
+@media (max-width: 360px) {
+    .header-title {
+        font-size: 1em;
+    }
+
+    th, td {
+        padding: 6px;
+        font-size: 12px;
+    }
+}
+
+/* Keep your existing pagination and search styles */
+.pagination {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.page-link {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+}
+
+.page-link.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.page-link.disabled {
+    pointer-events: none;
+    color: #ccc;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 50px;
+    padding: 5px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.search-wrapper:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+#searchInput {
+    width: calc(100% - 55px);
+    padding: 15px 55px 15px 25px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    color: #495057;
+    outline: none;
+}
+
+#searchInput::placeholder {
+    color: #adb5bd;
+}
+
+#searchButton {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #1a5f7a;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+}
+
+#searchButton:hover {
+    background: #2c88aa;
+    transform: scale(1.05);
+}
+
+#searchButton i {
+    font-size: 18px;
+}
+
+@media (max-width: 600px) {
+    .search-wrapper {
+        flex-direction: column;
+        background: transparent;
+        box-shadow: none;
+        gap: 10px;
+    }
+
+    #searchInput {
+        width: 100%;
+        background: #f8f9fa;
+        border-radius: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    #searchButton {
+        width: 45px;
+        padding: 12px;
+        margin: 0;
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+.date-subheader {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    color: #1a5f7a;
+    font-weight: 500;
+}
+
+.entry-count {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Add this CSS for fade-in effect */
+.fade-in {
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+
+.fade-in.visible {
+    opacity: 1;
+}
+</style>
+</body>
+</html>

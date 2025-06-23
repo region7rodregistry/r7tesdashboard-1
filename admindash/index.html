@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000000, #1a237e, #ffffff);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            text-align: center;
+        }
+        .content {
+            display: flex;
+            flex: 1;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 1rem;
+            transition: transform 0.3s ease-in-out;
+        }
+        .main {
+            flex: 1;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+        }
+        h1 {
+            margin: 0;
+        }
+        .tabs {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .tabs li {
+            margin-bottom: 1rem;
+        }
+        .tabs a {
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .tabs a:hover, .tabs a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .tabs i {
+            margin-right: 0.5rem;
+            width: 20px;
+            text-align: center;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                transform: translateX(-100%);
+                position: fixed;
+                top: 60px;
+                left: 0;
+                bottom: 0;
+                z-index: 1000;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main {
+                margin-left: 0;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        .button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1rem;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .iframe-container {
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            padding: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(-10px);
+        }
+        .iframe-container.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .modal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1001;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .close-button {
+            cursor: pointer;
+            font-size: 1.5rem;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .upload-notification {
+            display: none;
+            background-color: rgba(0, 255, 0, 0.8);
+            color: #000;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        .progress {
+            height: 20px;
+            background-color: #4caf50;
+            width: 0;
+            transition: width 0.4s;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>TESDA Regional Operations Division Dashboard</h1>
+        </header>
+        <div class="content">
+            <nav class="sidebar" id="sidebar">
+                <ul class="tabs">
+                    <li><a href="#utpras" class="active"><i class="fas fa-file-alt"></i> UTPRAS</a></li>
+                    <li><a href="#ptcacs"><i class="fas fa-chalkboard-teacher"></i> PTCACS</a></li>
+                    <li><a href="#scholarships"><i class="fas fa-graduation-cap"></i> SCHOLARSHIPS</a></li>
+                    <li><a href="#accounts-control"><i class="fas fa-users-cog"></i> Accounts Control</a></li>
+                    <li><a href="#settings"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+            <main class="main">
+                <div id="utpras" class="tab-content active">
+                    <h2>UTPRAS</h2>
+                    <p>Content for UTPRAS (Unified Tertiary Placement, Registration and Admission System) goes here.</p>
+                    <button class="button" id="nttc-button">NTTC</button>
+                    <button class="button" id="nttc-database-button">NTTC-Database</button>
+                    <button class="button" id="upload-button">Upload</button>
+                    <div id="nttc-iframe" class="iframe-container" style="display: none; margin-top: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">NTTC Content</div>
+                        <iframe src="../r7nttc/index.html" width="100%" height="400" style="border: none; border-radius: 5px;"></iframe>
+                    </div>
+                    <div id="nttc-database-iframe" class="iframe-container" style="display: none; margin-top: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">NTTC Database</div>
+                        <textarea id="json-editor" style="width: 100%; height: 400px; border: 1px solid #ffffff; border-radius: 5px; padding: 0.5rem; background-color: rgba(255, 255, 255, 0.1); color: #ffffff;"></textarea>
+                        <button id="save-button" class="button" style="margin-top: 1rem;">Save Changes</button>
+                    </div>
+                </div>
+                <div id="ptcacs" class="tab-content">
+                    <h2>PTCACS</h2>
+                    <p>Content for PTCACS (Post-Tertiary Colleges and Assessment Centers System) goes here.</p>
+                    <button class="button" id="ac-button">Assessment Centers</button>
+                    <button class="button" id="another-button">Another Button</button>
+                    <div id="ac-iframe" class="iframe-container" style="display: none; margin-top: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Assessment Centers Content</div>
+                        <iframe src="../r7ac/index.html" width="100%" height="400" style="border: none; border-radius: 5px;"></iframe>
+                    </div>
+                </div>
+                <div id="scholarships" class="tab-content">
+                    <h2>SCHOLARSHIPS</h2>
+                    <p>Content for SCHOLARSHIPS goes here.</p>
+                </div>
+                <div id="accounts-control" class="tab-content">
+                    <h2>Accounts Control</h2>
+                    <p>Content for Accounts Control goes here.</p>
+                </div>
+                <div id="settings" class="tab-content">
+                    <h2>Settings</h2>
+                    <p>Content for Settings goes here.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="upload-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal">&times;</span>
+            <h2>Upload JSON File</h2>
+            <input type="file" id="file-input" accept=".json">
+            <button id="submit-upload" class="button">Upload</button>
+            <div class="upload-notification" id="upload-notification">File has been uploaded successfully!</div>
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tabs a');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = tab.getAttribute('href').substring(1);
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    document.getElementById(targetId).classList.add('active');
+
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            });
+
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                }
+            });
+
+            const nttcButton = document.getElementById('nttc-button');
+            const nttcIframe = document.getElementById('nttc-iframe');
+            const nttcDatabaseButton = document.getElementById('nttc-database-button');
+            const nttcDatabaseIframe = document.getElementById('nttc-database-iframe');
+            const jsonEditor = document.getElementById('json-editor');
+            const saveButton = document.getElementById('save-button');
+            const acButton = document.getElementById('ac-button');
+            const acIframe = document.getElementById('ac-iframe');
+
+            nttcButton.addEventListener('click', () => {
+                if (nttcIframe.style.display === 'none') {
+                    nttcIframe.style.display = 'block';
+                    setTimeout(() => {
+                        nttcIframe.classList.add('show');
+                    }, 10);
+                } else {
+                    nttcIframe.classList.remove('show');
+                    setTimeout(() => {
+                        nttcIframe.style.display = 'none';
+                    }, 500);
+                }
+            });
+
+            nttcDatabaseButton.addEventListener('click', () => {
+                if (nttcDatabaseIframe.style.display === 'none') {
+                    nttcDatabaseIframe.style.display = 'block';
+                    setTimeout(() => {
+                        nttcDatabaseIframe.classList.add('show');
+                    }, 10);
+
+                    fetch('../r7nttc/data.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            jsonEditor.value = JSON.stringify(data, null, 2);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching JSON:', error);
+                        });
+                } else {
+                    nttcDatabaseIframe.classList.remove('show');
+                    setTimeout(() => {
+                        nttcDatabaseIframe.style.display = 'none';
+                    }, 500);
+                }
+            });
+
+            saveButton.addEventListener('click', () => {
+                const updatedData = jsonEditor.value;
+                console.log('Updated JSON data:', updatedData);
+            });
+
+            acButton.addEventListener('click', () => {
+                if (acIframe.style.display === 'none') {
+                    acIframe.style.display = 'block';
+                    setTimeout(() => {
+                        acIframe.classList.add('show');
+                    }, 10);
+                } else {
+                    acIframe.classList.remove('show');
+                    setTimeout(() => {
+                        acIframe.style.display = 'none';
+                    }, 500);
+                }
+            });
+
+            const uploadButton = document.getElementById('upload-button');
+            const uploadModal = document.getElementById('upload-modal');
+            const closeModal = document.getElementById('close-modal');
+            const fileInput = document.getElementById('file-input');
+            const submitUpload = document.getElementById('submit-upload');
+            const uploadNotification = document.getElementById('upload-notification');
+            const progressBar = document.getElementById('progress');
+            
+            uploadButton.addEventListener('click', () => {
+                uploadModal.style.display = 'flex';
+                progressBar.style.width = '0%'; // Reset progress bar
+                uploadNotification.style.display = 'none'; // Hide notification
+            });
+
+            closeModal.addEventListener('click', () => {
+                uploadModal.style.display = 'none';
+            });
+
+            submitUpload.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/upload', true);
+
+                    // Update progress bar
+                    xhr.upload.addEventListener('progress', (event) => {
+                        if (event.lengthComputable) {
+                            const percentComplete = (event.loaded / event.total) * 100;
+                            progressBar.style.width = percentComplete + '%';
+                        }
+                    });
+
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            uploadNotification.style.display = 'block';
+                            setTimeout(() => {
+                                uploadNotification.style.display = 'none';
+                            }, 3000); // Hide notification after 3 seconds
+                            uploadModal.style.display = 'none'; // Close modal after upload
+                        } else {
+                            console.error('Error uploading file:', xhr.statusText);
+                        }
+                    };
+
+                    xhr.send(formData);
+                } else {
+                    alert('Please select a file to upload.');
+                }
+            });
+
+            // Close modal when clicking outside of it
+            window.addEventListener('click', (event) => {
+                if (event.target === uploadModal) {
+                    uploadModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

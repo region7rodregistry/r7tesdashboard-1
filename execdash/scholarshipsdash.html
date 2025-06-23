@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESDA Region VII - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="icon" href="../icons/t7ilogo.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+body {
+    background: linear-gradient(135deg, #000000, #1e3a8a, #041653);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.chart-container {
+    height: 300px; /* Fixed height for chart containers */
+    overflow: hidden; /* Prevent overflow */
+}
+
+.table-container {
+    height: 400px; /* Fixed height for table */
+    overflow-y: auto; /* Allow vertical scrolling */
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 350px; /* Taller charts on mobile */
+    }
+    
+    /* Adjust spacing for mobile */
+    .p-4 {
+        padding: 1rem;
+    }
+    
+    /* Make text more readable on mobile */
+    .text-xl {
+        font-size: 1.1rem;
+    }
+    
+    /* Adjust card grid spacing */
+    .gap-6 {
+        gap: 1rem;
+    }
+    
+    /* Ensure proper spacing between nav items */
+    nav ul li {
+        margin-bottom: 0.5rem;
+    }
+    
+    nav ul li:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Adjust table for mobile */
+    .table-container {
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+    
+    /* Make sure charts don't overflow their containers */
+    canvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+}
+
+/* Additional styles for very small screens */
+@media (max-width: 480px) {
+    .chart-container {
+        height: 300px;
+    }
+    
+    .text-3xl {
+        font-size: 1.5rem;
+    }
+    
+    header img {
+        height: 40px;
+    }
+}
+
+/* Mobile-specific table styles */
+@media (max-width: 768px) {
+    .table-container {
+        margin: 0 -1rem;
+        border-radius: 0;
+        position: relative;
+    }
+    
+    .overflow-x-auto {
+        padding: 0 1rem;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+    
+    .table-container td {
+        white-space: normal;
+        min-width: 160px;
+        max-width: 200px;
+        font-size: 0.875rem;
+        padding: 0.75rem;
+        vertical-align: top;
+    }
+    
+    .table-container th {
+        position: sticky;
+        top: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10;
+    }
+    
+    /* Improved scroll indicator */
+    .table-container:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 20px;
+        height: 100%;
+        background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.3));
+        pointer-events: none;
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+/* Additional styles for very small screens */
+@media (max-width: 480px) {
+    .table-container td {
+        font-size: 0.8125rem;
+        min-width: 140px;
+        padding: 0.625rem;
+    }
+    
+    .table-container th {
+        font-size: 0.875rem;
+        padding: 0.625rem;
+    }
+}
+    </style>
+</head>
+<body class="text-white">
+    <!-- Replace sidebar and main content structure with new header-based layout -->
+    <div class="min-h-screen">
+        <!-- Header with navigation -->      
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">                 
+                    <div class="relative">                    
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main content -->
+        <main class="pt-20 p-4 md:p-8">
+            <!-- Existing content starts here -->
+            <header class="flex items-center justify-between mb-6">
+                <img src="../icons/tlogo.png" alt="Left Logo" class="h-16 mr-2">
+                <h2 class="text-3xl font-bold text-center flex-1">Welcome to TESDA Region VII Monitoring and Information System</h2>
+                <img src="../icons/blogo.png" alt="Right Logo" class="h-16 ml-2">
+            </header>
+            <nav>
+                <ul class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mb-6">
+                    <li class="w-full md:w-auto"><a href="../index.html" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">HOME</a></li>
+                    <li class="w-full md:w-auto"><a href="#" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">UTPRAS</a></li>
+                    <li class="w-full md:w-auto"><a href="#" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">PTCACs</a></li>
+                    <li class="w-full md:w-auto"><a href="#" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">Scholarships</a></li>
+                    <li class="w-full md:w-auto"><a href="#" id="screenshotButton" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">Screenshot</a></li>
+                </ul>
+            </nav>
+            
+            <!-- Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total Programs <i class="fas fa-scroll"></i></h3>
+                    <p id="totalPrograms" class="text-2xl font-bold">0</p>
+                </div>
+                
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total Institutions <i class="fas fa-school"></i></h3>
+                    <p id="totalInstitutions" class="text-2xl font-bold">0</p>
+                </div>
+                
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total Trainers (Warm Body) <i class="fas fa-chalkboard-teacher"></i></h3>
+                    <p id="totalTrainers" class="text-2xl font-bold">0</p>
+                </div>
+                
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total NTTC's Issued <i class="fas fa-file"></i></h3>
+                    <p id="totalNTTCs" class="text-2xl font-bold">0</p>
+                </div>
+            </div>
+
+            <!-- Chart Placeholder -->
+            <div class="bg-white bg-opacity-10 p-4 sm:p-6 rounded-lg mb-8">
+                <h3 class="text-xl font-semibold mb-4">Unified TVET Program Registration and Accreditation System (UTPRAS)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Chart containers with improved responsive sizing -->
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="utprasProvinceChart"></canvas>
+                    </div>
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="chart3"></canvas>
+                    </div>
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="chart4"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <h3 class="text-xl font-semibold mb-4">UTPRAS Data</h3>
+            <div class="bg-white bg-opacity-10 rounded-lg overflow-hidden table-container relative" style="height: auto;">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[640px]">
+                        <thead>
+                            <tr class="bg-black bg-opacity-50">
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Sectors</th>
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Qualifications</th>
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Institutions</th>
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Trainers</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topSectorsBody" class="divide-y divide-gray-700">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Update JavaScript -->
+    <script>
+        // Remove all sidebar related JavaScript and add dropdown functionality
+   
+
+        // Keep existing chart and data fetching functions
+        async function fetchData() {
+            try {
+                const response = await fetch('../r7utpras/data2.json');
+                const data = await response.json();
+                
+                // Count occurrences of each program type
+                const programCounts = {
+                    'WTR': 0,
+                    'NTR': 0,
+                    'COC': 0,
+                    'MTP': 0
+                };
+                
+                data.forEach(entry => {
+                    const programType = entry.Q?.toUpperCase()?.trim();
+                    if (programCounts.hasOwnProperty(programType)) {
+                        programCounts[programType]++;
+                    }
+                });
+                
+                updateDoughnutChart(programCounts);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function updateDoughnutChart(programCounts) {
+            const ctx = document.getElementById('doughnutChart').getContext('2d');
+            const doughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['WTR', 'NTR', 'COC', 'MTP'],
+                    datasets: [{
+                        data: [
+                            programCounts.WTR,
+                            programCounts.NTR,
+                            programCounts.COC,
+                            programCounts.MTP
+                        ],
+                        backgroundColor: [
+                            '#36A2EB',  // Blue
+                            '#FF6384',  // Pink
+                            '#4BC0C0',  // Teal
+                            '#FFCE56'   // Yellow
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'white'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Program Types Distribution',
+                            color: 'white',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function fetchProvinceData() {
+            try {
+                const response = await fetch('../r7utpras/data2.json');
+                const data = await response.json();
+                
+                // Group data by province and program type
+                const provinceData = {};
+                
+                data.forEach(entry => {
+                    const province = entry.B?.trim() || 'Unknown';
+                    const programType = entry.Q?.toUpperCase()?.trim();
+                    
+                    if (!provinceData[province]) {
+                        provinceData[province] = {
+                            'WTR': 0,
+                            'NTR': 0,
+                            'COC': 0,
+                            'MTP': 0,
+                            'Total': 0
+                        };
+                    }
+                    
+                    if (programType && provinceData[province].hasOwnProperty(programType)) {
+                        provinceData[province][programType]++;
+                        provinceData[province].Total++;
+                    }
+                });
+
+                // Prepare data for the chart
+                const sortedProvinces = Object.entries(provinceData)
+                    .sort((a, b) => b[1].Total - a[1].Total)
+                    .map(entry => entry[0]);
+
+                const wtrData = sortedProvinces.map(province => provinceData[province].WTR);
+                const ntrData = sortedProvinces.map(province => provinceData[province].NTR);
+                const mtpData = sortedProvinces.map(province => provinceData[province].MTP);
+                const cocData = sortedProvinces.map(province => provinceData[province].COC);
+
+                const utprasProvinceCtx = document.getElementById('utprasProvinceChart').getContext('2d');
+                new Chart(utprasProvinceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedProvinces,
+                        datasets: [
+                            {
+                                label: 'WTR Programs',
+                                data: wtrData,
+                                backgroundColor: '#4CAF50',
+                                borderColor: '#4CAF50',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'NTR Programs',
+                                data: ntrData,
+                                backgroundColor: '#2196F3',
+                                borderColor: '#2196F3',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'MTP Programs',
+                                data: mtpData,
+                                backgroundColor: '#FFC107',
+                                borderColor: '#FFC107',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'COC Programs',
+                                data: cocData,
+                                backgroundColor: '#FF5722',
+                                borderColor: '#FF5722',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: 'white',
+                                    padding: 10,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Program Distribution by Province and by Status',
+                                color: 'white',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: ${value}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching province data:', error);
+            }
+        }
+
+        async function fetchChart3Data() {
+            try {
+                const response = await fetch('../r7utpras/data2.json');
+                const data = await response.json();
+                
+                // Count occurrences of each value in Column P
+                const columnPCounts = {};
+                
+                data.forEach(entry => {
+                    const value = entry.P?.toUpperCase()?.trim();
+                    if (value) {
+                        columnPCounts[value] = (columnPCounts[value] || 0) + 1;
+                    }
+                });
+                
+                updateChart3Doughnut(columnPCounts);
+            } catch (error) {
+                console.error('Error fetching data for Chart 3:', error);
+            }
+        }
+
+        function updateChart3Doughnut(columnPCounts) {
+            const ctx = document.getElementById('chart3').getContext('2d');
+            const doughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(columnPCounts),
+                    datasets: [{
+                        data: Object.values(columnPCounts),
+                        backgroundColor: [
+                            '#36A2EB',  // Blue
+                            '#FF6384',  // Pink
+                            '#4BC0C0',  // Teal
+                            '#FFCE56'   // Yellow
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'white'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Data Distribution by Institution Type',
+                            color: 'white',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function fetchChart4Data() {
+            try {
+                const response = await fetch('../r7utpras/data2.json');
+                const data = await response.json();
+                
+                // Group data by province and sector
+                const provinceData = {};
+                
+                data.forEach(entry => {
+                    const province = entry.B?.trim() || 'Unknown';
+                    const sector = entry.P?.trim() || 'Unknown';
+                    
+                    if (!provinceData[province]) {
+                        provinceData[province] = {
+                            sectors: {},
+                            total: 0
+                        };
+                    }
+                    
+                    if (sector) {
+                        provinceData[province].sectors[sector] = (provinceData[province].sectors[sector] || 0) + 1;
+                        provinceData[province].total++;
+                    }
+                });
+
+                // Get unique sectors across all provinces
+                const allSectors = new Set();
+                Object.values(provinceData).forEach(province => {
+                    Object.keys(province.sectors).forEach(sector => allSectors.add(sector));
+                });
+                const sectors = Array.from(allSectors);
+
+                // Prepare data for the chart
+                const provinces = Object.keys(provinceData).sort((a, b) => 
+                    provinceData[b].total - provinceData[a].total
+                );
+
+                // Create datasets for each sector
+                const datasets = sectors.map((sector, index) => ({
+                    label: sector,
+                    data: provinces.map(province => provinceData[province].sectors[sector] || 0),
+                    backgroundColor: `hsl(${(index * 360) / sectors.length}, 70%, 50%)`,
+                    borderColor: `hsl(${(index * 360) / sectors.length}, 70%, 50%)`,
+                    borderWidth: 1
+                }));
+
+                const ctx = document.getElementById('chart4').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: provinces,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: 'white',
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Programs by Province and Sector',
+                                color: 'white',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching data for Chart 4:', error);
+            }
+        }
+
+        async function fetchTopTrainers() {
+            try {
+                const response = await fetch('../r7nttc/data.json');
+                const data = await response.json();
+                
+                // Create a map to store unique trainers and their counts
+                const trainerCounts = new Map();
+                
+                // Process each entry
+                data.forEach(entry => {
+                    // Construct full name with proper formatting
+                    const lastName = (entry.last_name || '').trim();
+                    const firstName = (entry.first_name || '').trim();
+                    const middleInitial = entry.middle_initial ? `${entry.middle_initial.trim()}.` : '';
+                    const extension = entry.extension ? ` ${entry.extension.trim()}` : '';
+                    
+                    // Only process if we have at least a last name and first name
+                    if (lastName && firstName) {
+                        // Format: "LAST NAME, FIRST NAME M. JR"
+                        const fullName = `${lastName.toUpperCase()}, ${firstName.toUpperCase()} ${middleInitial}${extension}`.trim();
+                        
+                        // Increment count for this trainer
+                        trainerCounts.set(fullName, (trainerCounts.get(fullName) || 0) + 1);
+                    }
+                });
+
+                // Convert to array and sort by count (descending)
+                const topTrainers = Array.from(trainerCounts.entries())
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                // Get existing data for other columns from UTPRAS
+                const response2 = await fetch('../r7utpras/data2.json');
+                const utprasData = await response2.json();
+                
+                // Process UTPRAS data for other columns
+                const sectorCounts = {};
+                const qualificationCounts = {};
+                const institutionCounts = {};
+                
+                utprasData.forEach(entry => {
+                    if (entry.R?.trim()) sectorCounts[entry.R.trim()] = (sectorCounts[entry.R.trim()] || 0) + 1;
+                    if (entry.S?.trim()) qualificationCounts[entry.S.trim()] = (qualificationCounts[entry.S.trim()] || 0) + 1;
+                    if (entry.G?.trim()) institutionCounts[entry.G.trim()] = (institutionCounts[entry.G.trim()] || 0) + 1;
+                });
+
+                const topSectors = Object.entries(sectorCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+                
+                const topQualifications = Object.entries(qualificationCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+                
+                const topInstitutions = Object.entries(institutionCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                // Update table
+                const topSectorsBody = document.getElementById('topSectorsBody');
+                topSectorsBody.innerHTML = '';
+
+                // Create rows
+                for (let i = 0; i < 5; i++) {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-gray-800 hover:bg-gray-700';
+                    
+                    row.innerHTML = `
+                        <td class="p-3 break-words">${topSectors[i] ? `${topSectors[i][0]} (${topSectors[i][1]})` : ''}</td>
+                        <td class="p-3 break-words">${topQualifications[i] ? `${topQualifications[i][0]} (${topQualifications[i][1]})` : ''}</td>
+                        <td class="p-3 break-words">${topInstitutions[i] ? `${topInstitutions[i][0]} (${topInstitutions[i][1]})` : ''}</td>
+                        <td class="p-3 break-words">${topTrainers[i] ? `${topTrainers[i][0]} (${topTrainers[i][1]} NTTC${topTrainers[i][1] > 1 ? 's' : ''})` : ''}</td>
+                    `;
+                    
+                    topSectorsBody.appendChild(row);
+                }
+
+                // Update total trainers count (unique trainers)
+                document.getElementById('totalTrainers').textContent = trainerCounts.size.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching and processing trainer data:', error);
+            }
+        }
+
+        async function fetchTotalPrograms() {
+            try {
+                const response = await fetch('../r7utpras/data2.json');
+                const data = await response.json();
+                const totalPrograms = data.length;
+                document.getElementById('totalPrograms').textContent = totalPrograms.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching total programs:', error);
+            }
+        }
+
+        async function fetchTotalInstitutions() {
+            try {
+                const response = await fetch('../r7utpras/data2.json');
+                const data = await response.json();
+                const uniqueInstitutions = new Set(data.map(entry => entry.J?.trim())); // Use Set to get unique values
+                document.getElementById('totalInstitutions').textContent = uniqueInstitutions.size.toLocaleString(); // Update the HTML with the count
+            } catch (error) {
+                console.error('Error fetching total institutions:', error);
+            }
+        }
+
+        async function fetchTotalNTTCs() {
+            try {
+                const response = await fetch('../r7nttc/data.json');
+                const data = await response.json();
+                const totalNTTCs = data.length;
+                document.getElementById('totalNTTCs').textContent = totalNTTCs.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching total NTTCs:', error);
+            }
+        }
+
+        // Update window.onload to call the new function
+        window.onload = function() {
+            fetchData();
+            fetchProvinceData();
+            fetchChart3Data();
+            fetchChart4Data();
+            fetchTopTrainers();
+            fetchTotalPrograms();
+            fetchTotalInstitutions();
+            fetchTotalNTTCs();
+        };
+
+        // Update the screenshot button event listener code
+        document.getElementById('screenshotButton').addEventListener('click', async function() {
+            // Show loading state
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = 'Capturing...';
+            button.disabled = true;
+
+            try {
+                // Add a small delay to ensure charts are fully rendered
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Capture the main content area
+                const mainContent = document.querySelector('main');
+                
+                // Force a specific size for better quality
+                const width = mainContent.offsetWidth;
+                const height = mainContent.offsetHeight;
+                
+                const canvas = await html2canvas(mainContent, {
+                    backgroundColor: '#000000',
+                    scale: 2,
+                    width: width,
+                    height: height,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: true,
+                    onrendered: function(canvas) {
+                        // This callback ensures the canvas is fully rendered
+                        console.log('Canvas rendered successfully');
+                    },
+                    onclone: function(clonedDoc) {
+                        const clonedMain = clonedDoc.querySelector('main');
+                        
+                        // Apply styles to ensure visibility
+                        clonedMain.style.width = `${width}px`;
+                        clonedMain.style.height = `${height}px`;
+                        clonedMain.style.position = 'relative';
+                        clonedMain.style.background = 'linear-gradient(135deg, #000000, #1e3a8a, #041653)';
+                        
+                        // Ensure all elements are visible
+                        const allElements = clonedMain.getElementsByTagName('*');
+                        for (let el of allElements) {
+                            const style = window.getComputedStyle(el);
+                            if (style.display !== 'none') {
+                                el.style.opacity = '1';
+                                el.style.visibility = 'visible';
+                            }
+                        }
+
+                        // Force charts to render synchronously
+                        const charts = clonedMain.querySelectorAll('canvas');
+                        charts.forEach(chart => {
+                            const originalChart = document.getElementById(chart.id);
+                            if (originalChart) {
+                                const context = chart.getContext('2d');
+                                context.drawImage(originalChart, 0, 0);
+                            }
+                        });
+                    }
+                });
+
+                // Create the final image
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = canvas.width;
+                finalCanvas.height = canvas.height;
+                const ctx = finalCanvas.getContext('2d');
+
+                // Draw gradient background
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#000000');
+                gradient.addColorStop(0.5, '#1e3a8a');
+                gradient.addColorStop(1, '#041653');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw the content
+                ctx.drawImage(canvas, 0, 0);
+
+                // Convert to blob for better handling of large images
+                finalCanvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    
+                    // Generate filename
+                    const date = new Date();
+                    const filename = `TESDA_R7_Dashboard_${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}.png`;
+                    link.download = filename;
+                    
+                    // Trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Cleanup
+                    URL.revokeObjectURL(url);
+                }, 'image/png', 1.0);
+
+            } catch (error) {
+                console.error('Screenshot failed:', error);
+                alert('Failed to capture screenshot. Please try again.');
+            } finally {
+                // Restore button state
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

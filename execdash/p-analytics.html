@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>TESDA Region VII - Dashboard</title>
+    <link rel="icon" href="../icons/t7ilogo.png" type="image/png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000428, #004e92);
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            width: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+            transition: text-shadow 0.3s ease;
+        }
+
+        .menu-item i:hover {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-container.expanded {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 85vw;
+            height: 85vh;
+            z-index: 1000;
+            opacity: 1;
+            animation: expandAnimation 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes expandAnimation {
+            from {
+                opacity: 0.5;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(0px);
+        }
+
+        .overlay.active {
+            display: block;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(5px);
+            }
+        }
+
+        .close-btn {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .chart-container.expanded .close-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInButton 0.3s ease 0.2s forwards;
+        }
+
+        @keyframes fadeInButton {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .chart-container.expanded .chart-wrapper {
+            height: calc(85vh - 100px);
+            animation: fadeInContent 0.4s ease forwards;
+        }
+
+        @keyframes fadeInContent {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 1000;
+                height: 100vh;
+                display: none;
+            }
+
+            .sidebar.collapsed {
+                transform: translateX(-100%);
+                display: block;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar-small {
+            display: none; /* Initially hidden */
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-small {
+                display: block; /* Show small part of the sidebar on mobile */
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 50px; /* Adjust width as needed */
+                height: 100vh;
+                background: rgba(255, 255, 255, 0.1);
+                z-index: 1000;
+            }
+
+            .sidebar-small .toggle-btn-small {
+                width: 100%;
+                height: 100%;
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                font-size: 20px;
+            }
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000428, #004e92);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-logo {
+            margin-bottom: 30px;
+        }
+
+        .loading-logo img {
+            width: 120px;
+            height: auto;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            border-radius: 10px;
+            animation: loading 3s ease-in-out forwards;
+        }
+
+        @keyframes loading {
+            0% {
+                width: 0%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .dots {
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% {
+                content: '.';
+            }
+            40% {
+                content: '..';
+            }
+            60%, 100% {
+                content: '...';
+            }
+        }
+
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                top: 0;
+                height: 100vh;
+                transition: left 0.3s ease;
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 10px;
+                width: 100%;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .dashboard-header h1 {
+                font-size: 1.2rem;
+                margin: 10px 0;
+            }
+
+            .header-logo {
+                width: 40px !important;
+                margin: 5px auto !important;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                margin-bottom: 15px;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            /* Mobile menu trigger */
+            .mobile-menu-trigger {
+                display: block;
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 1001;
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                backdrop-filter: blur(10px);
+            }
+
+            /* Mobile expanded chart adjustments */
+            .chart-container.expanded {
+                width: 95vw;
+                height: 90vh;
+                padding: 15px;
+            }
+
+            .chart-container.expanded .chart-wrapper {
+                height: calc(90vh - 80px);
+            }
+
+            /* Card improvements for mobile */
+            .card {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .card h3 {
+                font-size: 0.9rem;
+                margin-right: 10px;
+            }
+
+            .card p {
+                font-size: 1.2rem;
+                font-weight: bold;
+            }
+
+            /* Loading screen adjustments */
+            .loading-bar-container {
+                width: 80%;
+                max-width: 280px;
+            }
+
+            .loading-logo img {
+                width: 80px;
+            }
+
+            .loading-text {
+                font-size: 16px;
+            }
+        }
+
+        /* Mobile navigation styles */
+        .mobile-nav {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                padding: 10px;
+                justify-content: space-around;
+                z-index: 1000;
+            }
+
+            .mobile-nav-item {
+                color: white;
+                text-align: center;
+                padding: 8px;
+                border-radius: 5px;
+                transition: background 0.3s ease;
+            }
+
+            .mobile-nav-item i {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .mobile-nav-item span {
+                font-size: 12px;
+                display: block;
+            }
+
+            .mobile-nav-item:active {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="sidebar collapsed">
+            <div class="sidebar-header">
+                <div class="logo">Dashboard</div>
+                <button class="toggle-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <a href="index.html" style="text-decoration: none; color: inherit;">
+                <div class="menu-item">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">Home</span>
+                </div>
+            </a>
+            <div class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span class="menu-text">Analytics</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-users"></i>
+                <span class="menu-text">Users</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span class="menu-text">Settings</span>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="dashboard-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <img src="../icons/t7ilogo.png" alt="Left Logo" class="header-logo left-logo" style="width: 50px; height: auto; margin-right: 100px;">
+                <h1 style="flex: 1; text-align: center;">Welcome to TESDA Region VII Monitoring and Information System</h1>             
+                <img src="../icons/blogo.png" alt="Right Logo" class="header-logo right-logo" style="width: 50px; height: auto; margin-left: 100px;">
+            </div>
+            <div class="province-selection" style="margin: 20px 0; display: flex; justify-content: center;">
+                <select name="province" id="province-select" style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 5px; background: rgba(255, 255, 255, 0.1); color: rgb(255, 255, 255);">
+                    <option value="">Select Province</option>
+                    <option value="Cebu">Cebu</option>
+                    <option value="Bohol">Bohol</option>
+                    <option value="Negros Oriental">Negros Oriental</option>
+                    <option value="Siquijor">Siquijor</option>
+                </select>
+            </div>
+
+            <!-- Add the new info section -->
+            <div class="info-section" style="display: flex; margin: 20px 0; background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                <!-- Photo placeholder -->
+                <div class="photo-placeholder" style="width: 150px; height: 150px; background: rgba(255, 255, 255, 0.2); margin-right: 20px; display: flex; justify-content: center; align-items: center; border-radius: 5px;">
+                    <i class="fas fa-user" style="font-size: 48px;"></i>
+                </div>
+                
+                <!-- Information fields -->
+                <div class="info-fields" style="display: flex; flex-direction: column; justify-content: center;">
+                    <p style="margin: 5px 0;"><strong>Province:</strong> <span>Cebu</span></p>
+                    <p style="margin: 5px 0;"><strong>Office Address:</strong> <span>Gate 3, TESDA Compound, 487 Salinas Dr, Cebu City, 6000 Cebu</span></p>
+                    <p style="margin: 5px 0;"><strong>Director:</strong> <span>Dr. Floro T. Ringca Ph.D.TM</span></p>
+                </div>
+            </div>
+
+            <!-- Add the 4-column table -->
+            <div class="table-container" style="margin: 20px 0; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: rgba(255, 255, 255, 0.1); border-radius: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">TOP Registered Programs</th>
+                            <th style="padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">Top Assessment Centers</th>
+                            <th style="padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">Top Assessors</th>
+                            <th style="padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">TOP NTTC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Clear existing data -->
+                        <tr id="data-row-template" style="display: none;">
+                            <td class="program-name" style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);"></td>
+                            <td class="assessment-center" style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);"></td>
+                            <td class="assessor" style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);"></td>
+                            <td class="nttc" style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);"></td>
+                        </tr>
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" style="margin: 20px 0; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: rgba(255, 255, 255, 0.1); border-radius: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">TOP Trainers</th>
+                            <th style="padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">Top Schools</th>
+                            <th style="padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">Top Assessors</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topPerformersTable">
+                        <!-- Data will be populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-item">
+            <a href="../index.html" style="color: white; text-decoration: none;">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+        </div>
+        <div class="mobile-nav-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+        </div>
+        <div class="mobile-nav-item">
+            <i class="fas fa-users"></i>
+            <span>Users</span>
+        </div>
+        <div class="mobile-nav-item">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </div>
+    </nav>
+
+    <!-- Mobile menu trigger button -->
+    <button class="mobile-menu-trigger">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <script>
+        // Sidebar Toggle
+        const toggleBtn = document.querySelector('.toggle-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const menuTexts = document.querySelectorAll('.menu-text');
+
+        // Initially hide the sidebar on mobile
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        // Mobile menu handling
+        const mobileMenuTrigger = document.querySelector('.mobile-menu-trigger');
+        const overlay = document.querySelector('.overlay');
+
+        mobileMenuTrigger.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        // Handle mobile orientation changes
+        window.addEventListener('orientationchange', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
+
+        // Update the event listener for province selection
+        document.getElementById('province-select').addEventListener('change', function(e) {
+            const selectedProvince = e.target.value;
+            updateTablesByProvince(selectedProvince);
+        });
+
+        // Function to filter and update tables based on province
+        async function updateTablesByProvince(province) {
+            try {
+                const [utprasData, acData, assessorData, nttcData] = await Promise.all([
+                    fetch('../r7utpras/data2.json').then(res => res.json()),
+                    fetch('../r7ac/data.json').then(res => res.json()),
+                    fetch('../r7ac/data2.json').then(res => res.json()),
+                    fetch('../r7nttc/data.json').then(res => res.json())
+                ]);
+
+                // Helper function to get frequency count and sort with province filter
+                const getTopFrequent = (array, key, provinceKey, skipFirst = false) => {
+                    // Filter by province if selected
+                    const filteredArray = province 
+                        ? array.filter(item => item[provinceKey]?.toLowerCase() === province.toLowerCase())
+                        : array;
+
+                    const frequency = filteredArray.reduce((acc, item) => {
+                        const value = item[key];
+                        // Include province in the value if available
+                        const displayValue = item[provinceKey] 
+                            ? `${value} (${item[provinceKey]})` 
+                            : value;
+                        acc[displayValue] = (acc[displayValue] || 0) + 1;
+                        return acc;
+                    }, {});
+
+                    const sorted = Object.entries(frequency)
+                        .sort(([,a], [,b]) => b - a);
+
+                    const slicedData = skipFirst ? sorted.slice(1, 6) : sorted.slice(0, 5);
+                    return slicedData.map(([item, count]) => `${item} (${count})`);
+                };
+
+                // Get filtered data for each category
+                const topQualifications = getTopFrequent(utprasData, 'T', 'province', true);
+                const topAssessmentCenters = getTopFrequent(acData, 'I', 'province');
+                const topAssessors1 = getTopFrequent(assessorData, 'J', 'province');
+                const topNTTC = getTopFrequent(nttcData, 'sector', 'province');
+
+                // Update first table
+                const tableBody = document.querySelector('tbody');
+                const maxRows = Math.max(
+                    topQualifications.length,
+                    topAssessmentCenters.length,
+                    topAssessors1.length,
+                    topNTTC.length
+                );
+
+                // Clear existing rows except template
+                Array.from(tableBody.children).forEach(child => {
+                    if (child.id !== 'data-row-template') {
+                        tableBody.removeChild(child);
+                    }
+                });
+
+                // Add new filtered rows
+                for (let i = 0; i < maxRows; i++) {
+                    const newRow = document.getElementById('data-row-template').cloneNode(true);
+                    newRow.style.display = '';
+                    newRow.id = '';
+                    newRow.querySelector('.program-name').textContent = topQualifications[i] || '';
+                    newRow.querySelector('.assessment-center').textContent = topAssessmentCenters[i] || '';
+                    newRow.querySelector('.assessor').textContent = topAssessors1[i] || '';
+                    newRow.querySelector('.nttc').textContent = topNTTC[i] || '';
+                    tableBody.appendChild(newRow);
+                }
+
+                // Update second table (top performers)
+                const trainerCounts = {};
+                const schoolCounts = {};
+                const assessorCounts = {};
+
+                // Filter and count trainers by province
+                nttcData
+                    .filter(trainer => !province || trainer.province?.toLowerCase() === province.toLowerCase())
+                    .forEach(trainer => {
+                        const fullName = `${trainer.last_name}, ${trainer.first_name} ${trainer.middle_initial || ''} ${trainer.extension || ''}`.trim();
+                        const trainerName = trainer.province 
+                            ? `${fullName} (${trainer.province})` 
+                            : fullName;
+                        trainerCounts[trainerName] = (trainerCounts[trainerName] || 0) + 1;
+                    });
+
+                // Filter and count schools by province
+                utprasData
+                    .filter(school => !province || school.province?.toLowerCase() === province.toLowerCase())
+                    .forEach(school => {
+                        if (school.G) {
+                            const schoolName = school.province 
+                                ? `${school.G} (${school.province})` 
+                                : school.G;
+                            schoolCounts[schoolName] = (schoolCounts[schoolName] || 0) + 1;
+                        }
+                    });
+
+                // Filter and count assessors by province
+                assessorData
+                    .filter(assessor => !province || assessor.province?.toLowerCase() === province.toLowerCase())
+                    .forEach(assessor => {
+                        if (assessor.C) {
+                            const assessorName = assessor.province 
+                                ? `${assessor.C} (${assessor.province})` 
+                                : assessor.C;
+                            assessorCounts[assessorName] = (assessorCounts[assessorName] || 0) + 1;
+                        }
+                    });
+
+                // Sort and get top 3 for each category
+                const topTrainers = Object.entries(trainerCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3);
+                
+                const topSchools = Object.entries(schoolCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3);
+                
+                const topAssessors2 = Object.entries(assessorCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3);
+
+                // Update the top performers table
+                const performersTableBody = document.getElementById('topPerformersTable');
+                performersTableBody.innerHTML = ''; // Clear existing rows
+
+                const maxPerformerRows = Math.max(topTrainers.length, topSchools.length, topAssessors2.length);
+                const cellStyle = 'padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);';
+
+                for (let i = 0; i < maxPerformerRows; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="${cellStyle}">${topTrainers[i] ? `${topTrainers[i][0]} (${topTrainers[i][1]})` : ''}</td>
+                        <td style="${cellStyle}">${topSchools[i] ? `${topSchools[i][0]} (${topSchools[i][1]})` : ''}</td>
+                        <td style="${cellStyle}">${topAssessors2[i] ? `${topAssessors2[i][0]} (${topAssessors2[i][1]})` : ''}</td>
+                    `;
+                    performersTableBody.appendChild(row);
+                }
+
+            } catch (error) {
+                console.error('Error updating tables:', error);
+            }
+        }
+
+        // Initial load of data
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTablesByProvince('');  // Load all data initially
+        });
+    </script>
+</body>
+</html>

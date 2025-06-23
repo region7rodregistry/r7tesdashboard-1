@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NTTCMIS</title>
+    <link rel="icon" type="image/png" href="./icons/nttcmis.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Fade-in animation */
+        body {
+            opacity: 0; /* Start invisible */
+            transition: opacity 3s ease-in; /* Transition effect */
+        }
+
+        body.fade-in {
+            opacity: 1; /* Fully visible */
+        }
+    </style>
+</head>
+<body class="fade-in">
+<div class="header-container">
+    <div class="header-top">
+        <img src="./icons/tlogo.png" alt="Left Logo" class="logo">
+        <h1 class="header-title">Recently Expired NTTC Certificates</h1>
+        <img src="./icons/blogo.png" alt="Right Logo" class="logo">
+    </div>
+    <div class="button-container">
+        <button onclick="window.location.href='index.html'" class="action-button">Home</button>
+        <button onclick="window.location.href='convert.html'" class="action-button">Convert Excel</button>
+        <button onclick="window.location.href='recently-expired.html'" class="action-button">Recently Expired</button> 
+        <button onclick="window.location.href='dfr.html'"class="action-button">Due For Renewal</button>
+        <button onclick="window.location.href='statistics.html'"class="action-button">Statistics</button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- New Entry Count Display -->
+    <div id="entryCount" class="entry-count"></div>
+    <!-- Date Subheader -->
+    <div class="date-subheader">
+        Current NTTC Holders As of: <span id="currentDate"></span>
+    </div>
+
+    <!-- Search Input Field -->
+    <div class="search-container">
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" placeholder="Search records..." oninput="searchTable()">
+            <button id="searchButton" onclick="searchTable()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Extension</th>
+                <th>Qualification</th>
+                <th>Certificate Number</th>
+                <th>Control Number</th>
+                <th>Date Issuance</th>
+                <th>Validity</th>
+            </tr>
+        </thead>
+        <tbody id="data-table-body">
+            <!-- Data will be dynamically loaded here -->
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <span id="pagination"></span>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2024 Certificate Records Management System</p>
+        <div class="footer-links">
+            <a href="./index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="#"><i class="fas fa-info-circle"></i> About</a>
+            <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const entriesPerPage = 200;
+    let currentPage = 1;
+    let filteredData = [];
+    let originalData = [];
+
+    async function loadData() {
+        try {
+            const response = await fetch('data.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            originalData = data;
+            filteredData = originalData;
+            renderTable();
+        } catch (error) {
+            console.error("Error loading data:", error);
+        }
+    }
+
+    function renderTable() {
+        const startIndex = (currentPage - 1) * entriesPerPage;
+        
+        // Filter to show only expired entries
+        const today = new Date();
+        filteredData = originalData.filter(row => new Date(row.U) < today);
+        
+        const paginatedData = filteredData.slice(startIndex, startIndex + entriesPerPage);
+        const tableBody = document.getElementById("data-table-body");
+        
+        tableBody.innerHTML = paginatedData.map(row => {
+            const validityDate = new Date(row.U);
+            const today = new Date();
+            const threeMonthsFromNow = new Date();
+            threeMonthsFromNow.setMonth(today.getMonth() + 3);
+            
+            let validityColor = 'green';
+            if (validityDate < today) {
+                validityColor = 'red';
+            } else if (validityDate <= threeMonthsFromNow) {
+                validityColor = 'orange';
+            }
+
+            return `
+                <tr>
+                    <td>${row.C|| ''}</td>
+                    <td>${row.D || ''}</td>
+                    <td>${row.E || ''}</td>
+                    <td>${row.F || ''}</td>
+                    <td>${row.R || ''}</td>
+                    <td>${row.AB || ''}</td>
+                    <td>${row.AE || ''}</td>
+                    <td>${formatDate(row.AC)}</td>
+                    <td style="color: ${validityColor}">${formatDate(row.U)}</td>
+                </tr>
+            `;
+        }).join("");
+        
+        renderPagination();
+        document.getElementById("entryCount").textContent = `Total Entries: ${filteredData.length}`;
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredData.length / entriesPerPage);
+        const pagination = document.getElementById("pagination");
+        let paginationHTML = '';
+
+        paginationHTML += `<a href="#" class="page-link ${currentPage === 1 ? 'disabled' : ''}" 
+            onclick="setPage(${currentPage - 1})">Previous</a>`;
+
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `<a href="#" class="page-link ${i === currentPage ? 'active' : ''}" 
+                onclick="setPage(${i})">${i}</a>`;
+        }
+
+        paginationHTML += `<a href="#" class="page-link ${currentPage === totalPages ? 'disabled' : ''}" 
+            onclick="setPage(${currentPage + 1})">Next</a>`;
+
+        pagination.innerHTML = paginationHTML;
+    }
+
+    function setPage(page) {
+        currentPage = page;
+        renderTable();
+    }
+
+    function searchTable() {
+        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+        filteredData = originalData.filter(row =>
+            Object.values(row).some(value => value && value.toString().toLowerCase().includes(searchTerm))
+        );
+        currentPage = 1; 
+        renderTable();
+    }
+
+    loadData();
+
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-US', options);
+    }
+
+    // Add this line to trigger the fade-in effect after the content is loaded
+    window.onload = () => {
+        document.body.classList.add('fade-in');
+    };
+</script>
+
+<style>
+.pagination {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.page-link {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+}
+
+.page-link.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.page-link.disabled {
+    pointer-events: none;
+    color: #ccc;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 50px;
+    padding: 5px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.search-wrapper input {
+    border: none;
+    background: none;
+    outline: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    width: 100%;
+    color: #495057;
+    font-weight: 500;
+    border-radius: 50px;
+}
+
+.search-wrapper button {
+    border: none;
+    background: #007bff;
+    color: white;
+    padding: 0 15px;
+    height: 36px;
+    cursor: pointer;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.record-link {
+    color: black;
+    text-decoration: none;
+}
+
+.record-link:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Centering and styling for the entry count and date subheader */
+.entry-count, .date-subheader {
+    text-align: center; /* Center the text */
+    font-size: 18px; /* Increase font size */
+    margin: 10px 0; /* Add some margin */
+    color: #333; /* Darker color for better visibility */
+}
+</style>
+</body>
+</html>

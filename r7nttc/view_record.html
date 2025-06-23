@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer Directory</title>
+    <link rel="icon" href="icons/nttcmis.png" type="image/png">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-foreground: #ffffff;
+            --secondary: #f0f4f8;
+            --muted: #718096;
+            --muted-foreground: #4a5568;
+            --card: #ffffff;
+            --card-foreground: #2d3748;
+            --background: #f7fafc;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--card-foreground);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/icons/office.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(5px);
+            z-index: -1;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 1.5rem;
+            background-color: #f3f3e0;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 0.75rem;
+        }
+        .container:hover {
+            background-color: #cee7e5;
+            transition: background-color 0.3s ease;
+        }
+        .card-header {
+            background: linear-gradient(to right, black, #4a90e2);
+            color: var(--primary-foreground);
+            padding: 2rem;
+            position: relative;
+        }
+        .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 0 black;
+        }
+        .card-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        .back-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary-foreground);
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .back-button svg {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+        .card-content {
+            padding: 0;
+        }
+        .tabs {
+            display: flex;
+            background-color: var(--secondary);
+            padding: 0 1rem;
+        }
+        .tab {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--muted-foreground);
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .info-value {
+            font-size: 1rem;
+            color: var(--card-foreground);
+        }
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .loader svg {
+            animation: spin 1s linear infinite;
+            color: var(--primary);
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                border-radius: 0.5rem;
+            }
+            .card-header {
+                padding: 1.5rem;
+            }
+            .card-title {
+                font-size: 1.5rem;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                flex: 1 0 50%;
+                text-align: center;
+            }
+            .tab-content {
+                padding: 1.5rem;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <div id="loader" class="loader">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="2" x2="12" y2="6"></line>
+                <line x1="12" y1="18" x2="12" y2="22"></line>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                <line x1="2" y1="12" x2="6" y2="12"></line>
+                <line x1="18" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+            </svg>
+        </div>
+    </div>
+    <script>
+        async function fetchTrainerData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data.json');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                alert('Error fetching trainer data. Please try again later.');
+                return null;
+            }
+        }
+
+        function createInfoItem(label, value) {
+            return `
+                <div class="info-item">
+                    <span class="info-label">${label}</span>
+                    <span class="info-value">${value || 'N/A'}</span>
+                </div>
+            `;
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        function renderTrainerProfile(trainer) {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="card-header">
+                    <h1 class="card-title">${trainer.D} ${trainer.C}</h1>
+                    <p class="card-subtitle">${trainer.M}</p>
+                    <button class="back-button" onclick="window.history.back()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Back
+                    </button>
+                </div>
+                <div class="card-content">
+                    <div class="tabs">
+                        <button class="tab active" data-tab="personal">Personal</button>
+                        <button class="tab" data-tab="nc">NC</button>
+                        <button class="tab" data-tab="tm">TM</button>
+                        <button class="tab" data-tab="nttc">NTTC</button>
+                    </div>
+                    <div id="personal" class="tab-content active">
+                        <div class="info-grid">
+                            ${createInfoItem('Full Name', `${trainer.D} ${trainer.E || ''} ${trainer.C} ${trainer.F || ''}`)}
+                            ${createInfoItem('Birthday', formatDate(trainer.G))}
+                            ${createInfoItem('Sex', trainer.H)}
+                            ${createInfoItem('Address', trainer.I)}
+                            ${createInfoItem('E-Mail Address', trainer.J)}
+                            ${createInfoItem('Contact Number', trainer.K)}
+                            ${createInfoItem('Educational Attainment', trainer.L)}
+                            ${createInfoItem('Training Hours', trainer.O)}
+                            ${createInfoItem('Years of Experience', trainer.P)}
+                            ${createInfoItem('Training Institution', trainer.M)}
+                            ${createInfoItem('Type of Training Institution', trainer.N)}
+                        </div>
+                    </div>
+                    <div id="nc" class="tab-content">
+                        <div class="info-grid">
+                            ${createInfoItem('NC Cert Number', trainer.S)}
+                            ${createInfoItem('NC Date Issuance', formatDate(trainer.T))}
+                            ${createInfoItem('NC Validity', formatDate(trainer.U))}
+                            ${createInfoItem('Sector', trainer.Q)}
+                            ${createInfoItem('Qualification', trainer.R)}
+                        </div>
+                    </div>
+                    <div id="tm" class="tab-content">
+                        <div class="info-grid">
+                            ${createInfoItem('TM Cert Number', trainer.V)}
+                            ${createInfoItem('TM Date Issuance', formatDate(trainer.W))}
+                            ${createInfoItem('TM Validity', formatDate(trainer.X))}
+                            ${createInfoItem('Assessor 1', trainer.Y)}
+                            ${createInfoItem('Assessor 2', trainer.Z)}
+                            ${createInfoItem('Assessor 3', trainer.AA)}
+                        </div>
+                    </div>
+                    <div id="nttc" class="tab-content">
+                        <div class="info-grid">         
+                            ${createInfoItem('NTTC Cert Number', trainer.AB)}
+                            ${createInfoItem('NTTC Date Issuance',  formatDate(trainer.AC))}
+                            ${createInfoItem('NTTC Validity', formatDate(trainer.AD))}
+                            ${createInfoItem('NTTC CLN Number', (trainer.AE))}
+                            ${createInfoItem('NTTC State',(trainer.AF))}
+                            ${createInfoItem('Type of Employment', (trainer.AG))}
+                            ${createInfoItem('Status of Employment',(trainer.AH))}
+                            ${createInfoItem('Remarks',(trainer.AI))}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        async function initialize() {
+            const loader = document.getElementById('loader');
+            try {
+                const trainersData = await fetchTrainerData();
+                if (!trainersData) {
+                    throw new Error('No trainer data available');
+                }
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                if (id) {
+                    const trainer = trainersData.find(t => t.id.toString() === id);
+                    if (trainer) {
+                        renderTrainerProfile(trainer);
+                    } else {
+                        throw new Error('Trainer not found');
+                    }
+                } else {
+                    throw new Error('No trainer ID provided');
+                }
+            } catch (error) {
+                console.error('Initialization failed:', error);
+                document.getElementById('app').innerHTML = `
+                    <div class="card-header">
+                        <h1 class="card-title">Error</h1>
+                    </div>
+                    <div class="card-content">
+                        <p>${error.message}</p>
+                        <button class="back-button" onclick="window.history.back()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            Go Back
+                        </button>
+                    </div>
+                `;
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        initialize();
+    </script>
+</body>
+</html>

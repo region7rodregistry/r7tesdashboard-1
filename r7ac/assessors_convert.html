@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel to JSON Converter</title>
+    <link rel="icon" type="image/png" href="./icons/nttcmis.png">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #000428, #004e92);
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            background: linear-gradient(135deg, #333, #004e92);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #ffffff;
+        }
+
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .upload-area:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-color: #004e92;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #004e92, #3498db);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin: 5px 0;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #00366f, #2980b9);
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .progress {
+            height: 20px;
+            width: 0;
+            background-color: #3498db;
+            border-radius: 5px;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Excel to JSON Converter</h2>
+        <form id="uploadForm">
+            <div class="upload-area" id="dropZone">
+                <p>Drag & Drop your Excel file here or</p>
+                <input type="file" id="fileInput" name="excelFile" accept=".xlsx,.xls" required hidden>
+                <button type="button" class="btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                <div class="file-name" id="fileName"></div>
+            </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <button type="submit" class="btn" id="convertBtn" disabled>Convert to JSON</button>
+            <button type="button" class="btn" id="updateBtn" style="display: none;">Update data.json</button>
+        </form>
+        <div id="status"></div>
+    </div>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const convertBtn = document.getElementById('convertBtn');
+        const updateBtn = document.getElementById('updateBtn');
+        const statusDiv = document.getElementById('status');
+        const uploadForm = document.getElementById('uploadForm');
+        let convertedData = null;
+
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = `Selected File: ${file.name}`;
+                fileNameDisplay.style.display = 'block';
+                convertBtn.disabled = false;
+            }
+        });
+
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const file = fileInput.files[0];
+            if (!file) {
+                statusDiv.textContent = 'No file selected';
+                statusDiv.style.color = 'red';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = e.target.result;
+                const workbook = XLSX.read(data, { type: 'binary' });
+
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                const desiredColumns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
+                const filteredData = [];
+
+                for (let rowIndex = 1; rowIndex <= range.e.r; rowIndex++) {
+                    const row = {};
+                    desiredColumns.forEach(col => {
+                        const cellAddress = col + (rowIndex + 1);
+                        const cell = worksheet[cellAddress];
+                        if (cell) {
+                            row[col] = cell.v;
+                        }
+                    });
+                    if (Object.keys(row).length > 0) {
+                        filteredData.push(row);
+                    }
+                }
+
+                convertedData = filteredData;
+
+                statusDiv.textContent = 'Conversion successful! Click Update to save the data.';
+                statusDiv.style.color = 'green';
+
+                downloadJSON(convertedData, 'data2.json');
+
+                convertBtn.style.display = 'none';
+                updateBtn.style.display = 'block';
+            };
+
+            reader.onerror = function(error) {
+                statusDiv.textContent = 'Error reading the file';
+                statusDiv.style.color = 'red';
+            };
+
+            reader.readAsBinaryString(file);
+        });
+
+        updateBtn.addEventListener('click', async function() {
+            if (!convertedData) {
+                statusDiv.textContent = 'No data to update';
+                statusDiv.style.color = 'red';
+                return;
+            }
+
+            try {
+                statusDiv.textContent = 'Updating data...';
+                statusDiv.style.color = '#3498db';
+                updateBtn.disabled = true;
+
+                const response = await fetch('/api/save-json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: convertedData })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Server returned ' + response.status);
+                }
+
+                const result = await response.json();
+                statusDiv.textContent = 'Data successfully updated!';
+                statusDiv.style.color = 'green';
+                
+                uploadForm.reset();
+                fileNameDisplay.style.display = 'none';
+                convertBtn.style.display = 'block';
+                convertBtn.disabled = true;
+                updateBtn.style.display = 'none';
+                convertedData = null;
+            } catch (error) {
+                statusDiv.textContent = 'Error updating data: ' + error.message;
+                statusDiv.style.color = 'red';
+            } finally {
+                updateBtn.disabled = false;
+            }
+        });
+
+        function downloadJSON(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMIS</title>
+    <link rel="icon" href="/icons/t7ilogo.png" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        :root {
+            --primary-bg: linear-gradient(to bottom, #000000, #3498db);
+            --header-bg: rgba(0, 0, 0, 0.5);
+            --table-header-bg: rgba(0, 0, 0, 0.7);
+            --table-bg: rgba(255, 255, 255, 0.1);
+            --table-hover-bg: rgba(255, 255, 255, 0.2);
+            --button-bg: #3498db;
+            --button-hover-bg: #2980b9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--primary-bg);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        header {
+            background: var(--header-bg);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 0;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .nav-button {
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 2rem 0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 0 -1rem;
+            padding: 0 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--table-bg);
+            margin-top: 1rem;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: var(--table-header-bg);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        tr:hover {
+            background: var(--table-hover-bg);
+        }
+
+        footer {
+            background: var(--table-header-bg);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: auto;
+        }
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+                margin: 0.5rem 0;
+            }
+
+            .logo {
+                width: 60px;
+            }
+
+            nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-button {
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 0.5rem;
+                white-space: nowrap;
+            }
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--button-bg);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <img src="/icons/tlogo.png" alt="Left Logo" class="logo">
+            <h1>Summary</h1>
+            <img src="/icons/blogo.png" alt="Right Logo" class="logo">
+        </div>
+    </header>
+
+    <main class="container">
+        <nav>
+            <button onclick="window.location.href='compendium.html'" class="nav-button">Home</button>
+            <button onclick="window.location.href='convert.html'" class="nav-button">Convert Excel</button>
+            <button onclick="window.location.href='compendium.html'" class="nav-button">Compendium</button>
+        </nav>
+
+        <p style="text-align: center;">As of: <span id="currentDate"></span></p>
+
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Province</th>
+                        <th>WTR</th>
+                        <th>NTR</th>
+                        <th>MTP</th>
+                        <th>CoC</th>
+                        <th>Total</th>
+                        <th>TVIs</th>
+                        <th>Farm School</th>
+                        <th>HEIs</th>
+                        <th>Enterprise (MCC)</th>
+                        <th>LGU</th>
+                        <th>LUC</th>
+                        <th>SUC</th>
+                        <th>TTI</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="data-body"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; <script>document.write(new Date().getFullYear())</script> Developed by TESDA Region VII</a>. All rights reserved. - ROD / <a href="ictprofile.html" style="color: inherit; text-decoration: underline;">ICT Unit</a></p>
+    </footer>
+
+    <script>
+        // Set current date
+        const currentDateElement = document.getElementById('currentDate');
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        currentDateElement.textContent = new Date().toLocaleDateString(undefined, options);
+
+        // Fetch and populate table data
+        fetch('data.json')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('data-body');
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.Province || ''}</td>
+                        <td>${item.WTR || ''}</td>
+                        <td>${item.NTR || ''}</td>
+                        <td>${item.MTP || ''}</td>
+                        <td>${item.CoC || ''}</td>
+                        <td><strong>${item.Total || ''}</strong></td>
+                        <td>${item.Private_TVIs || ''}</td>
+                        <td>${item.Private_Farm_School || ''}</td>
+                        <td>${item.Enterprise || ''}</td>
+                        <td>${item.Private_HEIs || ''}</td>
+                        <td>${item.Public_LGU || ''}</td>
+                        <td>${item.Public_LUC || ''}</td>
+                        <td>${item.Public_SUC || ''}</td>
+                        <td>${item.Public_TTI || ''}</td>
+                        <td><strong>${item.Public_Total || ''}</strong></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error loading the data:', error));
+    </script>
+</body>
+</html>

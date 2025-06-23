@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom right, #000000, #0047ab);
+      padding: 1rem;
+    }
+    
+    .card {
+      width: 100%;
+      max-width: 28rem;
+      background-color: rgba(0, 0, 0, 0.3);
+      border: 1px solid #2a2a2a;
+      border-radius: 0.5rem;
+      backdrop-filter: blur(8px);
+      color: white;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 1.5rem 1.5rem 0 1.5rem;
+    }
+    
+    .card-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .card-content {
+      padding: 1.5rem;
+    }
+    
+    .upload-area {
+      border: 2px dashed #4a4a4a;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    
+    .upload-area:hover {
+      border-color: #3b82f6;
+    }
+    
+    .upload-area.dragging {
+      border-color: #60a5fa;
+      background-color: rgba(30, 64, 175, 0.2);
+    }
+    
+    .upload-icon {
+      width: 3rem;
+      height: 3rem;
+      margin: 0 auto 1rem auto;
+      color: #60a5fa;
+    }
+    
+    .upload-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    
+    .file-info {
+      display: none;
+      text-align: center;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      color: #93c5fd;
+    }
+    
+    .file-size {
+      color: #9ca3af;
+      font-size: 0.875rem;
+    }
+    
+    .upload-text {
+      color: #d1d5db;
+      margin-bottom: 0.5rem;
+    }
+    
+    .upload-subtext {
+      color: #6b7280;
+      font-size: 0.75rem;
+    }
+    
+    .browse-container {
+      position: relative;
+      margin-top: 1rem;
+    }
+    
+    .file-input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .browse-button {
+      background: linear-gradient(to right, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .browse-button:hover {
+      background: linear-gradient(to right, #1d4ed8, #1e40af);
+    }
+    
+    .card-footer {
+      padding: 0 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .upload-button {
+      width: 100%;
+      background: linear-gradient(to right, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 0.25rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .upload-button:hover:not(:disabled) {
+      background: linear-gradient(to right, #1d4ed8, #1e40af);
+    }
+    
+    .upload-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+  
+  <!-- Update Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  
+  <!-- Keep SheetJS library -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Upload File</h2>
+    </div>
+    <div class="card-content">
+      <div id="uploadArea" class="upload-area">
+        <div class="upload-content">
+          <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          
+          <div id="fileInfo" class="file-info">
+            <p id="fileName" class="file-name"></p>
+            <p id="fileSize" class="file-size"></p>
+          </div>
+          
+          <div id="uploadPrompt">
+            <p class="upload-text">Drag and drop your file here or click to browse</p>
+            <p class="upload-subtext">Supports Excel files (.xlsx, .xls) up to 10MB</p>
+          </div>
+          
+          <div class="browse-container">
+            <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls">
+            <button class="browse-button">Browse Files</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button id="uploadButton" class="upload-button" disabled>Upload File</button>
+      <a href="preview.html" style="display: block; text-align: center; margin-top: 1rem; color: #93c5fd; text-decoration: none;">
+        View Uploaded Data →
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmgjzLx4mVkeWyfjwKNMtxmL9o1BesaW0",
+      authDomain: "sampleform-fd82e.firebaseapp.com",
+      projectId: "sampleform-fd82e",
+      databaseURL: "https://sampleform-fd82e-default-rtdb.firebaseio.com",
+      storageBucket: "sampleform-fd82e.appspot.com",
+      messagingSenderId: "129137441476",
+      appId: "1:129137441476:web:e29e8ca547b93aa1d3a791",
+      measurementId: "G-DZMYEG4NHL"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const storage = firebase.storage();
+    const database = firebase.database();
+
+    // Test database connection
+    database.ref('.info/connected').on('value', (snap) => {
+      if (snap.val() === true) {
+        console.log('Connected to Firebase Database');
+      } else {
+        console.log('Not connected to Firebase Database');
+      }
+    });
+
+    // DOM elements
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadButton = document.getElementById('uploadButton');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    
+    // File state
+    let selectedFile = null;
+    
+    // Modify file input to accept only Excel files
+    fileInput.setAttribute('accept', '.xlsx, .xls');
+
+    // Update the upload subtext
+    document.querySelector('.upload-subtext').textContent = 'Supports Excel files (.xlsx, .xls) up to 10MB';
+
+    // Function to process Excel file
+    async function processExcelFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          try {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            // Convert to JSON, starting from row 4
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+              header: 1,
+              range: 2,  // Start from row 4
+              defval: 'N/A'  // Default value for empty cells
+            });
+            
+            // Check if there's at least one row after skipping
+            if (jsonData.length === 0) {
+              reject(new Error('Excel file is empty or has less than 4 rows'));
+              return;
+            }
+
+            // Get the maximum number of columns from all rows
+            const maxColumns = Math.max(...jsonData.map(row => row.length));
+
+            // Format the data with consistent column count
+            const formattedData = jsonData.map(row => {
+              // Ensure each row has the same number of columns
+              const paddedRow = Array(maxColumns).fill('N/A');
+              row.forEach((cell, index) => {
+                paddedRow[index] = cell || 'N/A';
+              });
+              return paddedRow;
+            });
+
+            resolve(formattedData);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        
+        reader.onerror = (error) => reject(error);
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // Update the upload button click event
+    uploadButton.addEventListener('click', async () => {
+      if (selectedFile) {
+        try {
+          uploadButton.textContent = 'Processing...';
+          uploadButton.disabled = true;
+
+          // Process Excel file
+          const excelData = await processExcelFile(selectedFile);
+
+          // Create a unique ID for this upload
+          const uploadId = Date.now().toString();
+
+          // Format the data for Firebase
+          const formattedData = {
+            fileName: selectedFile.name,
+            uploadDate: new Date().toISOString(),
+            rows: excelData.map((row, rowIndex) => ({
+              rowNumber: rowIndex + 1,
+              columns: row.map((value, colIndex) => ({
+                column: colIndex + 1,
+                value: value || 'N/A'
+              }))
+            }))
+          };
+
+          // Save to database
+          await database.ref(`excel_data/${uploadId}`).set(formattedData);
+          console.log('Data saved to database successfully');
+          
+          alert('Excel data uploaded successfully!');
+          
+          // Reset the form
+          uploadButton.textContent = 'Upload File';
+          uploadButton.disabled = false;
+          fileInfo.style.display = 'none';
+          uploadPrompt.style.display = 'block';
+          fileInput.value = '';
+          selectedFile = null;
+          
+        } catch (error) {
+          console.error('Process error:', error);
+          alert(error.message || 'Error processing file. Please try again.');
+          uploadButton.textContent = 'Upload File';
+          uploadButton.disabled = false;
+        }
+      }
+    });
+
+    // Update file validation in handleFileSelect
+    function handleFileSelect(file) {
+      const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+      
+      if (!validTypes.includes(file.type)) {
+        alert('Please select a valid Excel file (.xlsx or .xls)');
+        return;
+      }
+
+      if (file) {
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = (file.size / 1024).toFixed(2) + ' KB';
+        fileInfo.style.display = 'block';
+        uploadPrompt.style.display = 'none';
+        uploadButton.disabled = false;
+      }
+    }
+    
+    // File input change event
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFileSelect(e.target.files[0]);
+      }
+    });
+    
+    // Drag and drop events
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragging');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragging');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragging');
+      
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+  </script>
+</body>
+</html>

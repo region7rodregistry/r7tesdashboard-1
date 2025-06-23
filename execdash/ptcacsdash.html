@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESDA Region VII - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="icon" href="../icons/t7ilogo.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+body {
+    background: linear-gradient(135deg, #000000, #1e3a8a, #041653);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.chart-container {
+    height: 300px; /* Fixed height for chart containers */
+    overflow: hidden; /* Prevent overflow */
+}
+
+.table-container {
+    height: 400px; /* Fixed height for table */
+    overflow-y: auto; /* Allow vertical scrolling */
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 350px; /* Taller charts on mobile */
+    }
+    
+    /* Adjust spacing for mobile */
+    .p-4 {
+        padding: 1rem;
+    }
+    
+    /* Make text more readable on mobile */
+    .text-xl {
+        font-size: 1.1rem;
+    }
+    
+    /* Adjust card grid spacing */
+    .gap-6 {
+        gap: 1rem;
+    }
+    
+    /* Ensure proper spacing between nav items */
+    nav ul li {
+        margin-bottom: 0.5rem;
+    }
+    
+    nav ul li:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Adjust table for mobile */
+    .table-container {
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+    
+    /* Make sure charts don't overflow their containers */
+    canvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+}
+
+/* Additional styles for very small screens */
+@media (max-width: 480px) {
+    .chart-container {
+        height: 300px;
+    }
+    
+    .text-3xl {
+        font-size: 1.5rem;
+    }
+    
+    header img {
+        height: 40px;
+    }
+}
+
+/* Mobile-specific table styles */
+@media (max-width: 768px) {
+    .table-container {
+        margin: 0 -1rem;
+        border-radius: 0;
+        position: relative;
+    }
+    
+    .overflow-x-auto {
+        padding: 0 1rem;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+    
+    .table-container td {
+        white-space: normal;
+        min-width: 160px;
+        max-width: 200px;
+        font-size: 0.875rem;
+        padding: 0.75rem;
+        vertical-align: top;
+    }
+    
+    .table-container th {
+        position: sticky;
+        top: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10;
+    }
+    
+    /* Improved scroll indicator */
+    .table-container:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 20px;
+        height: 100%;
+        background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.3));
+        pointer-events: none;
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+/* Additional styles for very small screens */
+@media (max-width: 480px) {
+    .table-container td {
+        font-size: 0.8125rem;
+        min-width: 140px;
+        padding: 0.625rem;
+    }
+    
+    .table-container th {
+        font-size: 0.875rem;
+        padding: 0.625rem;
+    }
+}footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: .2 rem;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Replace sidebar and main content structure with new header-based layout -->
+    <div class="min-h-screen">
+        <!-- Header with navigation -->      
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">                 
+                    <div class="relative">                    
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main content -->
+        <main class="pt-20 p-4 md:p-8">
+            <!-- Existing content starts here -->
+            <header class="flex items-center justify-center mb-6 gap-2">
+                <img src="../icons/tlogo.png" alt="Left Logo" class="h-16">
+                <h2 class="text-3xl font-bold text-center">Welcome to TESDA Region VII Monitoring and Information System</h2>
+                <img src="../icons/blogo.png" alt="Right Logo" class="h-16">
+            </header>
+            <nav>
+                <ul class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mb-6">
+                    <li class="w-full md:w-auto"><a href="index.html" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">HOME</a></li>
+                    <li class="w-full md:w-auto"><a href="utprasdash.html" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">UTPRAS</a></li>
+                    <li class="w-full md:w-auto"><a href="ptcacsdash.html" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">PTCACs</a></li>
+                    <li class="w-full md:w-auto"><a href="scholarshipsdash.html" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">Scholarships</a></li>
+                    <li class="w-full md:w-auto"><a href="#" id="screenshotButton" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out shadow-md border border-white">Screenshot</a></li>
+                </ul>
+            </nav>
+            
+            <!-- Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total Accredited Qualifications <i class="fas fa-scroll"></i></h3>
+                    <p id="totalPrograms" class="text-2xl font-bold">0</p>
+                </div>
+                
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total Accredited Assessment Centers</i></h3>
+                    <p id="totalInstitutions" class="text-2xl font-bold">0</p>
+                </div>
+                
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total Assessors (Warm Body) <i class="fas fa-chalkboard-teacher"></i></h3>
+                    <p id="totalTrainers" class="text-2xl font-bold">0</p>
+                </div>
+                
+                <div class="bg-white bg-opacity-10 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-semibold mb-1">Total Qualifications <i class="fas fa-file"></i></h3>
+                    <p id="totalNTTCs" class="text-2xl font-bold">0</p>
+                </div>
+            </div>
+
+            <!-- Chart Placeholder -->
+            <div class="bg-white bg-opacity-10 p-4 sm:p-6 rounded-lg mb-8">
+                <h3 class="text-xl font-semibold mb-4">Philippine TVET Competency Assessment and Certification System. (PTCACs)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Chart containers with improved responsive sizing -->
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="chart3"></canvas>
+                    </div>
+                    <div class="bg-gray-200 bg-opacity-20 rounded p-2 sm:p-4 chart-container">
+                        <canvas id="chart4"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <h3 class="text-xl font-semibold mb-4">PTCACs Data</h3>
+            <div class="bg-white bg-opacity-10 rounded-lg overflow-hidden table-container relative" style="height: auto;">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[640px]">
+                        <thead>
+                            <tr class="bg-black bg-opacity-50">
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Sectors (Assessment Centers)</th>                              
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Qualifications (Assessment Centers)</th>
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Sectors (Assessors)</th>
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Qualifications (Assessors)</th>
+                                <th class="p-2 sm:p-3 text-left whitespace-nowrap">Top 5 Assessors</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topSectorsBody" class="divide-y divide-gray-700">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer>
+        <div class="container">
+            <p>&copy; <script>document.write(new Date().getFullYear())</script> Developed by TESDA Region VII</a>. All rights reserved. - ROD / <a href="ictprofile.html" style="color: inherit; text-decoration: underline;">ICT Unit</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // Remove all sidebar related JavaScript and add dropdown functionality
+   
+
+        // Keep existing chart and data fetching functions
+        async function fetchData() {
+            try {
+                // Fetch data for province counts
+                const response = await fetch('../r7ac/data.json');
+                const data = await response.json();
+                
+                // Fetch total entries from data.json
+                const totalResponse = await fetch('../r7ac/data.json');
+                const totalData = await totalResponse.json();
+                const totalEntries = totalData.length;
+                
+                // Initialize counts for specific provinces
+                const provinceCounts = {
+                    'CEBU': 0,
+                    'BOHOL': 0,   
+                    'NEGROS ORIENTAL': 0,
+                    'SIQUIJOR': 0
+                };
+                
+                data.forEach(entry => {
+                    const province = entry.B?.trim()?.toUpperCase() || '';
+                    // Only count if it's one of our specific provinces
+                    if (provinceCounts.hasOwnProperty(province)) {
+                        provinceCounts[province]++;
+                    }
+                });
+                
+                updateDoughnutChart(provinceCounts, totalEntries);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function updateDoughnutChart(provinceCounts, totalEntries) {
+            const ctx = document.getElementById('chart1').getContext('2d');
+            
+            // Calculate total for provinces
+            const total = Object.values(provinceCounts).reduce((sum, count) => sum + count, 0);
+            
+            // Define specific colors for each province
+            const provinceColors = {
+                'BOHOL': '#C19A6B',         // Light brown
+                'CEBU': '#228B22',          // Green
+                'NEGROS ORIENTAL': '#0000FF', // Blue
+                'SIQUIJOR': '#FFD700'       // Yellow
+            };
+            
+            const labels = Object.keys(provinceCounts);
+            const data = Object.values(provinceCounts);
+            const colors = labels.map(province => provinceColors[province]);
+
+            const doughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'white'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: [`Assessment Centers by Province`, `Total Entries: ${totalEntries}`],
+                            color: 'white',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function fetchProvinceData() {
+            try {
+                const response = await fetch('../r7ac/data.json');
+                const data = await response.json();
+                
+                // Get total number of entries from data.json
+                const totalEntries = data.length;
+
+                // Group data by province (Column B) and sector (Column I)
+                const provinceData = {};
+                
+                data.forEach(entry => {
+                    const province = entry.B?.trim() || 'Unknown';
+                    const sector = entry.I?.trim() || 'Unknown';
+                    
+                    if (!provinceData[province]) {
+                        provinceData[province] = {
+                            sectors: {},
+                            Total: 0
+                        };
+                    }
+                    
+                    if (sector) {
+                        provinceData[province].sectors[sector] = (provinceData[province].sectors[sector] || 0) + 1;
+                        provinceData[province].Total++;
+                    }
+                });
+
+                // Get top 5 sectors for each province
+                const processedData = {};
+                const allSectors = new Set();
+                
+                Object.entries(provinceData).forEach(([province, data]) => {
+                    const topSectors = Object.entries(data.sectors)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+                    
+                    processedData[province] = Object.fromEntries(topSectors);
+                    topSectors.forEach(([sector]) => allSectors.add(sector));
+                });
+
+                // Convert sectors to array and sort alphabetically
+                const sectors = Array.from(allSectors).sort();
+
+                // Sort provinces by total count
+                const sortedProvinces = Object.entries(provinceData)
+                    .sort((a, b) => b[1].Total - a[1].Total)
+                    .map(entry => entry[0]);
+
+                // Create datasets for each sector
+                const datasets = sectors.map((sector, index) => ({
+                    label: sector,
+                    data: sortedProvinces.map(province => processedData[province][sector] || 0),
+                    backgroundColor: `hsl(${(index * 360) / sectors.length}, 70%, 50%)`,
+                    borderColor: `hsl(${(index * 360) / sectors.length}, 70%, 50%)`,
+                    borderWidth: 1
+                }));
+
+                const chart2Ctx = document.getElementById('chart2').getContext('2d');
+                new Chart(chart2Ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedProvinces,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: 'white',
+                                    padding: 10,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: [`Top 5 Sectors by Province`, `Total Entries: ${totalEntries}`],
+                                color: 'white',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: ${value}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching province data:', error);
+            }
+        }
+
+        async function fetchChart3Data() {
+            try {
+                const response = await fetch('../r7ac/data2.json');
+                const data = await response.json();
+                
+                // Count occurrences of each province in Column B
+                const provinceCounts = {};
+                
+                data.forEach(entry => {
+                    const province = entry.B?.trim()?.toUpperCase();
+                    if (province) {
+                        provinceCounts[province] = (provinceCounts[province] || 0) + 1;
+                    }
+                });
+                
+                updateChart3Doughnut(provinceCounts);
+            } catch (error) {
+                console.error('Error fetching data for Chart 3:', error);
+            }
+        }
+
+        function updateChart3Doughnut(provinceCounts) {
+            const ctx = document.getElementById('chart3').getContext('2d');
+            
+            // Sort provinces by count in descending order
+            const sortedProvinces = Object.entries(provinceCounts)
+                .sort((a, b) => b[1] - a[1]);
+            
+            const total = Object.values(provinceCounts).reduce((sum, count) => sum + count, 0);
+            
+            const doughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedProvinces.map(([province]) => province),
+                    datasets: [{
+                        data: sortedProvinces.map(([, count]) => count),
+                        backgroundColor: [
+                            '#228B22',  // Green for Cebu
+                            '#C19A6B',  // Light brown for Bohol
+                            '#0000FF',  // Blue for Negros Oriental
+                            '#FFD700'   // Yellow for Siquijor
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'white'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: [`Assessors Distribution by Province`, `Total: ${total}`],
+                            color: 'white',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function fetchChart4Data() {
+            try {
+                const response = await fetch('../r7ac/data2.json');
+                const data = await response.json();
+                
+                // Get total number of entries from data2.json
+                const totalEntries = data.length;
+
+                // Group data by province and sector (using column J)
+                const provinceData = {};
+                
+                data.forEach(entry => {
+                    const province = entry.B?.trim() || 'Unknown';
+                    const sector = entry.J?.trim() || 'Unknown';
+                    
+                    if (!provinceData[province]) {
+                        provinceData[province] = new Map();
+                    }
+                    
+                    if (sector) {
+                        provinceData[province].set(sector, (provinceData[province].get(sector) || 0) + 1);
+                    }
+                });
+
+                // Get top 5 sectors for each province
+                const processedData = {};
+                Object.keys(provinceData).forEach(province => {
+                    const sortedSectors = Array.from(provinceData[province].entries())
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+                    processedData[province] = Object.fromEntries(sortedSectors);
+                });
+
+                // Get unique sectors across all provinces (only top 5 from each)
+                const allSectors = new Set();
+                Object.values(processedData).forEach(provinceSectors => {
+                    Object.keys(provinceSectors).forEach(sector => allSectors.add(sector));
+                });
+                const sectors = Array.from(allSectors);
+
+                // Prepare data for the chart
+                const provinces = Object.keys(processedData);
+
+                // Create datasets for each sector
+                const datasets = sectors.map((sector, index) => ({
+                    label: sector,
+                    data: provinces.map(province => processedData[province][sector] || 0),
+                    backgroundColor: `hsl(${(index * 360) / sectors.length}, 70%, 50%)`,
+                    borderColor: `hsl(${(index * 360) / sectors.length}, 70%, 50%)`,
+                    borderWidth: 1
+                }));
+
+                const ctx = document.getElementById('chart4').getContext('2d');
+                const totalByProvince = datasets.reduce((sum, dataset) => {
+                    return sum + dataset.data.reduce((a, b) => a + b, 0);
+                }, 0);
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: provinces,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: 'white',
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: [`Top 5 Sectors by Province`, `Total Entries: ${totalEntries}`],
+                                color: 'white',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching data for Chart 4:', error);
+            }
+        }
+
+        async function fetchTopTrainers() {
+            try {
+                // Fetch data from r7ac/data.json for assessment centers
+                const responseAC = await fetch('../r7ac/data.json');
+                const acData = await responseAC.json();
+                
+                // Process assessment centers from column C
+                const assessmentCenterCounts = {};
+                acData.forEach(entry => {
+                    if (entry.C?.trim()) {
+                        assessmentCenterCounts[entry.C.trim()] = (assessmentCenterCounts[entry.C.trim()] || 0) + 1;
+                    }
+                });
+
+                // Get top 5 assessment centers
+                const topAssessmentCenters = Object.entries(assessmentCenterCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                // Rest of the existing code for other columns...
+                const responseAssessors = await fetch('../r7ac/data2.json');
+                const assessorData = await responseAssessors.json();
+                
+                // Process assessor sectors from column J
+                const assessorSectorCounts = {};
+                assessorData.forEach(entry => {
+                    if (entry.J?.trim()) {
+                        assessorSectorCounts[entry.J.trim()] = (assessorSectorCounts[entry.J.trim()] || 0) + 1;
+                    }
+                });
+
+                // Get top 5 assessor sectors
+                const topAssessorSectors = Object.entries(assessorSectorCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                // Process qualifications from column K
+                const qualificationCounts = {};
+                acData.forEach(entry => {
+                    if (entry.J?.trim()) {
+                        qualificationCounts[entry.J.trim()] = (qualificationCounts[entry.J.trim()] || 0) + 1;
+                    }
+                });
+
+                // Get top 5 qualifications
+                const topQualifications = Object.entries(qualificationCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                // Process assessor qualifications from column K in data2.json
+                const assessorQualificationCounts = {};
+                assessorData.forEach(entry => {
+                    if (entry.K?.trim()) {
+                        assessorQualificationCounts[entry.K.trim()] = (assessorQualificationCounts[entry.K.trim()] || 0) + 1;
+                    }
+                });
+
+                // Get top 5 assessor qualifications
+                const topAssessorQualifications = Object.entries(assessorQualificationCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                // Process assessors from column C in data2.json
+                const assessorNameCounts = {};
+                assessorData.forEach(entry => {
+                    if (entry.C?.trim()) {
+                        assessorNameCounts[entry.C.trim()] = (assessorNameCounts[entry.C.trim()] || 0) + 1;
+                    }
+                });
+
+                // Get top 5 assessors
+                const topAssessors = Object.entries(assessorNameCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                // Update table
+                const topSectorsBody = document.getElementById('topSectorsBody');
+                topSectorsBody.innerHTML = '';
+
+                // Create rows
+                for (let i = 0; i < 5; i++) {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-gray-800 hover:bg-gray-700';
+                    
+                    row.innerHTML = `
+                        <td class="p-3 break-words">${topAssessmentCenters[i] ? `${topAssessmentCenters[i][0]} (${topAssessmentCenters[i][1]})` : ''}</td>
+                        <td class="p-3 break-words">${topQualifications[i] ? `${topQualifications[i][0]} (${topQualifications[i][1]})` : ''}</td>
+                        <td class="p-3 break-words">${topAssessorSectors[i] ? `${topAssessorSectors[i][0]} (${topAssessorSectors[i][1]})` : ''}</td>
+                        <td class="p-3 break-words">${topAssessorQualifications[i] ? `${topAssessorQualifications[i][0]} (${topAssessorQualifications[i][1]})` : ''}</td>
+                        <td class="p-3 break-words">${topAssessors[i] ? `${topAssessors[i][0]} (${topAssessors[i][1]})` : ''}</td>
+                    `;
+                    
+                    topSectorsBody.appendChild(row);
+                }
+            } catch (error) {
+                console.error('Error fetching and processing data:', error);
+            }
+        }
+
+        async function fetchTotalPrograms() {
+            try {
+                const response = await fetch('../r7ac/data.json');
+                const data = await response.json();
+                // Count all entries in column J (including duplicates)
+                const totalPrograms = data.filter(entry => entry.J?.trim()).length;
+                document.getElementById('totalPrograms').textContent = totalPrograms.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching total programs:', error);
+            }
+        }
+
+        async function fetchTotalInstitutions() {
+            try {
+                const response = await fetch('../r7ac/data.json');
+                const data = await response.json();
+                // Count unique entries in column C (Assessment Centers)
+                const uniqueInstitutions = new Set(data.map(entry => entry.C?.trim()).filter(Boolean));
+                document.getElementById('totalInstitutions').textContent = uniqueInstitutions.size.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching total institutions:', error);
+            }
+        }
+
+        async function fetchTotalNTTCs() {
+            try {
+                const response = await fetch('../r7ac/data2.json');
+                const data = await response.json();
+                // Count all entries in column K (Qualifications)
+                const totalQualifications = data.filter(entry => entry.K?.trim()).length;
+                document.getElementById('totalNTTCs').textContent = totalQualifications.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching total qualifications:', error);
+            }
+        }
+
+        async function fetchTotalTrainers() {
+            try {
+                const response = await fetch('../r7ac/data2.json');
+                const data = await response.json();
+                
+                // Count unique entries in column C (Assessors)
+                const uniqueAssessors = new Set(data.map(entry => entry.C?.trim()).filter(Boolean));
+                
+                // Update the display with the count of unique assessors
+                document.getElementById('totalTrainers').textContent = uniqueAssessors.size.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching and processing trainer data:', error);
+            }
+        }
+
+        // Update window.onload to call the new function
+        window.onload = function() {
+            fetchData();
+            fetchProvinceData();
+            fetchChart3Data();
+            fetchChart4Data();
+            fetchTopTrainers();
+            fetchTotalPrograms();
+            fetchTotalInstitutions();
+            fetchTotalNTTCs();
+            fetchTotalTrainers();
+        };
+
+        // Update the screenshot button event listener code
+        document.getElementById('screenshotButton').addEventListener('click', async function() {
+            // Show loading state
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = 'Capturing...';
+            button.disabled = true;
+
+            try {
+                // Add a small delay to ensure charts are fully rendered
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Capture the main content area
+                const mainContent = document.querySelector('main');
+                
+                // Force a specific size for better quality
+                const width = mainContent.offsetWidth;
+                const height = mainContent.offsetHeight;
+                
+                const canvas = await html2canvas(mainContent, {
+                    backgroundColor: '#000000',
+                    scale: 2,
+                    width: width,
+                    height: height,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: true,
+                    onrendered: function(canvas) {
+                        // This callback ensures the canvas is fully rendered
+                        console.log('Canvas rendered successfully');
+                    },
+                    onclone: function(clonedDoc) {
+                        const clonedMain = clonedDoc.querySelector('main');
+                        
+                        // Apply styles to ensure visibility
+                        clonedMain.style.width = `${width}px`;
+                        clonedMain.style.height = `${height}px`;
+                        clonedMain.style.position = 'relative';
+                        clonedMain.style.background = 'linear-gradient(135deg, #000000, #1e3a8a, #041653)';
+                        
+                        // Ensure all elements are visible
+                        const allElements = clonedMain.getElementsByTagName('*');
+                        for (let el of allElements) {
+                            const style = window.getComputedStyle(el);
+                            if (style.display !== 'none') {
+                                el.style.opacity = '1';
+                                el.style.visibility = 'visible';
+                            }
+                        }
+
+                        // Force charts to render synchronously
+                        const charts = clonedMain.querySelectorAll('canvas');
+                        charts.forEach(chart => {
+                            const originalChart = document.getElementById(chart.id);
+                            if (originalChart) {
+                                const context = chart.getContext('2d');
+                                context.drawImage(originalChart, 0, 0);
+                            }
+                        });
+                    }
+                });
+
+                // Create the final image
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = canvas.width;
+                finalCanvas.height = canvas.height;
+                const ctx = finalCanvas.getContext('2d');
+
+                // Draw gradient background
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#000000');
+                gradient.addColorStop(0.5, '#1e3a8a');
+                gradient.addColorStop(1, '#041653');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw the content
+                ctx.drawImage(canvas, 0, 0);
+
+                // Convert to blob for better handling of large images
+                finalCanvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    
+                    // Generate filename
+                    const date = new Date();
+                    const filename = `TESDA_R7_Dashboard_${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}.png`;
+                    link.download = filename;
+                    
+                    // Trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Cleanup
+                    URL.revokeObjectURL(url);
+                }, 'image/png', 1.0);
+
+            } catch (error) {
+                console.error('Screenshot failed:', error);
+                alert('Failed to capture screenshot. Please try again.');
+            } finally {
+                // Restore button state
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

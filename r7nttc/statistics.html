@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NTTCMIS</title>
+    <link rel="icon" type="image/png" href="./icons/nttcmis.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'running-red-outline': 'running-red-outline 1.5s infinite',
+                        'running-orange-outline': 'running-orange-outline 1.5s infinite',
+                    },
+                    keyframes: {
+                        'running-red-outline': {
+                            '0%, 100%': { boxShadow: '0 0 0 red' },
+                            '50%': { boxShadow: '0 0 5px red' },
+                        },
+                        'running-orange-outline': {
+                            '0%, 100%': { boxShadow: '0 0 0 rgb(255, 166, 0)' },
+                            '50%': { boxShadow: '0 0 5px rgb(255, 153, 0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #000000 0%, #1a237e 50%, #000000 100%);
+        }
+        .gradient-button {
+            background: linear-gradient(135deg, #1a237e 0%, #000000 100%);
+        }
+        .gradient-button:hover {
+            background: linear-gradient(135deg, #000000 0%, #1a237e 100%);
+        }
+        .gradient-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="opacity-0 transition-opacity duration-3000 ease-in fade-in gradient-bg min-h-screen text-white">
+    <div class="w-full shadow-lg bg-black/30 backdrop-blur-sm border-b border-white/10">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-4">
+                    <img src="./icons/tlogo.png" alt="Left Logo" class="w-20 h-auto md:w-24 hover:scale-105 transition-transform duration-300">
+                    <div class="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                </div>
+                
+                <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-center text-white bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                    NATIONAL TVET TRAINER'S CERTIFICATE RECORDS
+                </h1>
+                
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                    <img src="./icons/blogo.png" alt="Right Logo" class="w-20 h-auto md:w-24 hover:scale-105 transition-transform duration-300">
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3 mt-8">
+                <button onclick="window.location.href='./index.html'" class="px-6 py-2.5 gradient-button text-white rounded-lg transition-all duration-300 min-w-[140px] hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </button>
+                <button onclick="window.location.href='convert.html'" class="px-6 py-2.5 gradient-button text-white rounded-lg transition-all duration-300 min-w-[140px] hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
+                    <i class="fas fa-file-excel"></i>
+                    <span>Convert Excel</span>
+                </button>
+                <button onclick="window.location.href='recently-expired.html'" class="px-6 py-2.5 bg-transparent text-red-400 rounded-lg border-2 border-red-400 hover:bg-red-400/10 transition-all duration-300 min-w-[140px] animate-running-red-outline flex items-center justify-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Recently Expired</span>
+                </button>
+                <button onclick="window.location.href='dfr.html'" class="px-6 py-2.5 bg-transparent text-orange-400 rounded-lg border-2 border-orange-400 hover:bg-orange-400/10 transition-all duration-300 min-w-[140px] animate-running-orange-outline flex items-center justify-center gap-2">
+                    <i class="fas fa-clock"></i>
+                    <span>Due For Renewal</span>
+                </button>
+                <button onclick="window.location.href='statistics.html'" class="px-6 py-2.5 gradient-button text-white rounded-lg transition-all duration-300 min-w-[140px] hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Statistics</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white/5 backdrop-blur-sm rounded-lg shadow-xl p-6">
+                <div class="flex flex-col md:flex-row justify-center gap-4 mb-6">
+                    <button onclick="showTab('sector')" class="tab-button px-6 py-2.5 gradient-button text-white rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Sector Tally</span>
+                    </button>
+                    <button onclick="showTab('qualification')" class="tab-button px-6 py-2.5 gradient-button text-white rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
+                        <i class="fas fa-certificate"></i>
+                        <span>Qualification Tally</span>
+                    </button>
+                    <button onclick="showTab('province')" class="tab-button px-6 py-2.5 gradient-button text-white rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Province Tally</span>
+                    </button>
+                </div>
+
+                <div id="sectorTally" class="tab-content active">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-blue-200">Sector Tally</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+                            <thead class="bg-black/30">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-200 uppercase tracking-wider">Sector</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-200 uppercase tracking-wider">Count</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectorTallyBody" class="divide-y divide-white/10">
+                                <!-- Sector tally data will be populated here -->
+                            </tbody>
+                            <tfoot class="bg-black/30">
+                                <tr>
+                                    <td class="px-6 py-3 text-left text-sm font-medium text-blue-200">Total</td>
+                                    <td id="totalSectorCount" class="px-6 py-3 text-left text-sm font-medium text-blue-200">0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="qualificationTally" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-blue-200">Qualification Tally</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+                            <thead class="bg-black/30">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-200 uppercase tracking-wider">Qualification</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-200 uppercase tracking-wider">Count</th>
+                                </tr>
+                            </thead>
+                            <tbody id="qualificationTallyBody" class="divide-y divide-white/10">
+                                <!-- Qualifications tally data will be populated here -->
+                            </tbody>
+                            <tfoot class="bg-black/30">
+                                <tr>
+                                    <td class="px-6 py-3 text-left text-sm font-medium text-blue-200">Total</td>
+                                    <td id="totalQualificationCount" class="px-6 py-3 text-left text-sm font-medium text-blue-200">0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="provinceTally" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-blue-200">Province Tally (Unique Trainers)</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+                            <thead class="bg-black/30">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-200 uppercase tracking-wider">Province</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-200 uppercase tracking-wider">Unique Trainers</th>
+                                </tr>
+                            </thead>
+                            <tbody id="provinceTallyBody" class="divide-y divide-white/10">
+                                <!-- Province tally data will be populated here -->
+                            </tbody>
+                            <tfoot class="bg-black/30">
+                                <tr>
+                                    <td class="px-6 py-3 text-left text-sm font-medium text-blue-200">Total Unique Trainers</td>
+                                    <td id="totalProvinceCount" class="px-6 py-3 text-left text-sm font-medium text-blue-200">0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-black/50 backdrop-blur-sm py-6 mt-8 border-t border-white/10">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-center md:text-left mb-4 md:mb-0 text-blue-200">&copy; 2024 Certificate Records Management System</p>
+                <div class="flex gap-6">
+                    <a href="./index.html" class="text-blue-200 hover:text-white transition-colors"><i class="fas fa-home"></i> Home</a>
+                    <a href="#" class="text-blue-200 hover:text-white transition-colors"><i class="fas fa-info-circle"></i> About</a>
+                    <a href="#" class="text-blue-200 hover:text-white transition-colors"><i class="fas fa-envelope"></i> Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        async function loadTallyData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+
+                const sectorCount = {};
+                const qualificationCount = {};
+                const provinceUnique = {};
+                const allUniqueTrainers = new Set();
+
+                // Count sectors, qualifications, and unique trainers per province
+                data.forEach(entry => {
+                    // Sector tally
+                    if (entry.Q) {
+                        sectorCount[entry.Q] = (sectorCount[entry.Q] || 0) + 1;
+                    }
+                    // Qualification tally
+                    if (entry.R) {
+                        qualificationCount[entry.R] = (qualificationCount[entry.R] || 0) + 1;
+                    }
+                    // Province unique tally
+                    if (entry.B) {
+                        // Build a unique name key
+                        const nameKey = [entry.C, entry.D, entry.E, entry.F].map(x => x ? x.toString().trim().toUpperCase() : '').join('|');
+                        if (!provinceUnique[entry.B]) provinceUnique[entry.B] = new Set();
+                        provinceUnique[entry.B].add(nameKey);
+                        allUniqueTrainers.add(nameKey);
+                    }
+                });
+
+                // Populate sector tally table
+                const sectorTallyBody = document.getElementById('sectorTallyBody');
+                sectorTallyBody.innerHTML = "";
+                let totalCount = 0;
+                const sortedSectors = Object.entries(sectorCount).sort(([a], [b]) => a.localeCompare(b));
+                for (const [sector, count] of sortedSectors) {
+                    sectorTallyBody.innerHTML += `
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-white">${sector}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-white">${count}</td>
+                        </tr>`;
+                    totalCount += count;
+                }
+                document.getElementById('totalSectorCount').textContent = totalCount;
+
+                // Populate qualifications tally table
+                const qualificationTallyBody = document.getElementById('qualificationTallyBody');
+                qualificationTallyBody.innerHTML = "";
+                let totalQualificationCount = 0;
+                const sortedQualifications = Object.entries(qualificationCount).sort(([a], [b]) => a.localeCompare(b));
+                for (const [qualification, count] of sortedQualifications) {
+                    qualificationTallyBody.innerHTML += `
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-white">${qualification}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-white">${count}</td>
+                        </tr>`;
+                    totalQualificationCount += count;
+                }
+                document.getElementById('totalQualificationCount').textContent = totalQualificationCount;
+
+                // Populate province tally table (unique trainers)
+                const provinceTallyBody = document.getElementById('provinceTallyBody');
+                provinceTallyBody.innerHTML = "";
+                let totalProvinceUnique = 0;
+                const sortedProvinces = Object.entries(provinceUnique).sort(([a], [b]) => a.localeCompare(b));
+                for (const [province, trainerSet] of sortedProvinces) {
+                    provinceTallyBody.innerHTML += `
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-white">${province}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-white">${trainerSet.size}</td>
+                        </tr>`;
+                    totalProvinceUnique += trainerSet.size;
+                }
+                document.getElementById('totalProvinceCount').textContent = allUniqueTrainers.size;
+            } catch (error) {
+                console.error('Failed to load tally data:', error);
+            }
+        }
+
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                tab.classList.add('hidden');
+            });
+
+            buttons.forEach(button => {
+                button.classList.remove('gradient-button');
+                button.classList.add('bg-white/10');
+            });
+
+            let activeTab = null;
+            if (tabName === 'sector') activeTab = document.getElementById('sectorTally');
+            else if (tabName === 'qualification') activeTab = document.getElementById('qualificationTally');
+            else if (tabName === 'province') activeTab = document.getElementById('provinceTally');
+
+            const activeButton = document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`);
+            if (activeTab) {
+                activeTab.classList.remove('hidden');
+                activeTab.classList.add('active');
+            }
+            if (activeButton) {
+                activeButton.classList.remove('bg-white/10');
+                activeButton.classList.add('gradient-button');
+            }
+        }
+
+        // Call the function to load tally data
+        loadTallyData();
+
+        // Add fade-in effect
+        window.onload = () => {
+            document.body.classList.add('opacity-100');
+        };
+    </script>
+</body>
+</html>

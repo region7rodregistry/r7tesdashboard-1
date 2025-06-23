@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to JSON Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom right, #1a202c, #2d3748);
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+
+        .dropzone {
+            border: 2px dashed #cbd5e0;
+            border-radius: 4px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropzone:hover {
+            background-color: #f7fafc;
+        }
+
+        .dropzone p {
+            margin: 0;
+        }
+
+        .progress-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background-color: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #4299e1;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #718096;
+        }
+
+        #jsonOutput {
+            margin-top: 1rem;
+            background-color: #f7fafc;
+            border-radius: 4px;
+            padding: 1rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background-color: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Excel to JSON Converter</h1>
+        <p>Upload your Excel file to convert it to JSON format</p>
+        <div class="dropzone" id="dropzone">
+            <p>Click to upload or drag and drop</p>
+            <p>XLSX or XLS (MAX. 10MB)</p>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;">
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <p class="progress-text" id="progressText">Converting... 0%</p>
+        </div>
+        <pre id="jsonOutput"></pre>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+       function formatDate(excelDate) {
+    // Convert the Excel date to a JavaScript Date object
+    const date = new Date((excelDate - 25569) * 86400 * 1000);
+    // Format the date as MM/DD/YYYY
+    const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}/${date.getFullYear()}`;
+    return formattedDate; // Return the formatted date value
+}
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function handleFile(file) {
+            if (!file) {
+                showToast('Please upload an Excel file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 3 });
+                const filteredData = jsonData.map((row, index) => ({
+                id: index +1,
+                A: row[0] !== undefined ? row[0] : null,
+                B: row[1] !== undefined ? row[1] : null,
+                C: row[2] !== undefined ? row[2] : null,
+                D: row[3] !== undefined ? row[3] : null,
+                E: row[4] !== undefined ? row[4] : null,
+                F: row[5] !== undefined ? row[5] : null,
+                G: typeof row[6] === 'number' ? formatDate(row[6]) : row[6] || null,
+                H: row[7] !== undefined ? row[7] : null,
+                I: row[8] !== undefined ? row[8] : null,
+                J: row[9] !== undefined ? row[9] : null,
+                K: row[10] !== undefined ? row[10] : null,
+                L: row[11] !== undefined ? row[11] : null,
+                M: row[12] !== undefined ? row[12] : null,
+                N: row[13] !== undefined ? row[13] : null,
+                O: row[14] !== undefined ? row[14] : null,
+                P: row[15] !== undefined ? row[15] : null,
+                Q: row[16] !== undefined ? row[16] : null,
+                R: row[17] !== undefined ? row[17] : null,
+                S: row[18] !== undefined ? row[18] : null,
+                T: row[19] !== undefined ? row[19] : null,
+                U: typeof row[20] === 'number' ? formatDate(row[20]) : row[20] || null,
+                V: row[21] !== undefined ? row[21] : null,
+                W: row[22] !== undefined ? row[22] : null,
+                X: typeof row[23] === 'number' ? formatDate(row[23]) : row[23] || null,
+                Y: row[24] !== undefined ? row[24] : null,
+                Z: row[25] !== undefined ? row[25] : null,
+                AA: row[26] !== undefined ? row[26] : null,
+                AB: row[27] !== undefined ? row[27] : null,
+                AC: typeof row[28] === 'number' ? formatDate(row[28]) : row[28] || null,
+                AD: typeof row[29] === 'number' ? formatDate(row[29]) : row[29] || null,
+                AE: row[30] !== undefined ? row[30] : null,
+                AF: row[31] !== undefined ? row[31] : null,
+                AG: row[32] !== undefined ? row[32] : null,
+                AH: row[33] !== undefined ? row[33] : null,
+                AI: row[34] !== undefined ? row[34] : null
+                }));
+
+                const jsonOutput = JSON.stringify(filteredData, null, 2);
+                document.getElementById('jsonOutput').textContent = jsonOutput;
+                document.getElementById('jsonOutput').style.display = 'block';
+
+                // Simulate progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    document.getElementById('progress').style.width = `${progress}%`;
+                    document.getElementById('progressText').textContent = `Converting... ${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        downloadJson(jsonOutput);
+                    }
+                }, 50);
+            };
+
+            document.getElementById('progressContainer').style.display = 'block';
+            reader.readAsArrayBuffer(file);
+        }
+
+        function downloadJson(jsonData) {
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('Your JSON file has been downloaded.');
+        }
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.style.backgroundColor = '#f7fafc';
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.style.backgroundColor = '';
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.style.backgroundColor = '';
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to JSON Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            background: linear-gradient(to bottom, #000000, #0000ff, #ffffff);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px #000000;
+        }
+        .file-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        #fileInput {
+            display: none;
+        }
+        .file-input-label {
+            background: linear-gradient(to right, #000000, #0000ff, #ffffff);
+            color: #ffffff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .file-input-label:hover {
+            transform: scale(1.05);
+        }
+        #convertButton {
+            background: linear-gradient(to right, #000000, #0000ff, #ffffff);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: transform 0.3s, background 0.3s;
+            width: 100%;
+        }
+        #convertButton:hover {
+            transform: scale(1.05);
+        }
+        #convertButton:disabled {
+            background: #555555;
+            cursor: not-allowed;
+        }
+        #fileName {
+            margin-top: 10px;
+            font-style: italic;
+            color: #ffffff;
+        }
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            height: 20px;
+            width: 0;
+            border-radius: 5px;
+            transition: width 0.4s ease;
+        }
+        #progressText {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Excel to JSON Converter</h1>
+        <div class="file-input-wrapper">
+            <label for="fileInput" class="file-input-label">Choose Excel File</label>
+            <input type="file" id="fileInput" accept=".xlsx, .xls" />
+            <div id="fileName"></div>
+        </div>
+        <button id="convertButton" disabled>Convert to JSON</button>
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div id="progressText"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const convertButton = document.getElementById('convertButton');
+        const fileNameDisplay = document.getElementById('fileName');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                fileNameDisplay.textContent = `Selected file: ${fileInput.files[0].name}`;
+                convertButton.disabled = false;
+            } else {
+                fileNameDisplay.textContent = '';
+                convertButton.disabled = true;
+            }
+        });
+
+        convertButton.addEventListener('click', () => {
+            if (!fileInput.files.length) {
+                alert('Please select an Excel file first.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            progressContainer.style.display = 'block';
+            progressText.textContent = '0%';
+            convertButton.disabled = true;
+
+            reader.onload = function (event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                const sheetName = "Summary";
+                const sheet = workbook.Sheets[sheetName];
+                if (!sheet) {
+                    alert(`Sheet "${sheetName}" not found in the Excel file.`);
+                    resetProgress();
+                    return;
+                }
+
+                const range = "B6:P10";
+                const extractedData = XLSX.utils.sheet_to_json(sheet, { header: 1, range });
+
+                const jsonData = extractedData.map(row => ({
+                    Province: row[0] || null,
+                    WTR: row[1] || null,
+                    NTR: row[2] || null,
+                    MTP: row[3] || null,
+                    CoC: row[4] || null,
+                    Total: row[5] || null,
+                    Private_TVIs: row[6] || null,
+                    Private_Farm_School: row[7] || null,
+                    Enterprise: row[8] || null,
+                    Private_HEIs: row[9] || null,
+                    Public_LGU: row[10] || null,
+                    Public_LUC: row[11] || null,
+                    Public_SUC: row[12] || null,
+                    Public_TTI: row[13] || null,
+                    Public_Total: row[14] || null,
+                }));
+
+                simulateProgress(() => {
+                    const jsonBlob = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(jsonBlob);
+                    link.download = "data.json";
+                    link.click();
+
+                    resetProgress();
+                });
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+
+        function simulateProgress(callback) {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 1;
+                updateProgress(progress);
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    callback();
+                }
+            }, 20);
+        }
+
+        function updateProgress(value) {
+            progressBar.style.width = `${value}%`;
+            progressText.textContent = `${value}%`;
+            if (value <= 25) progressBar.style.backgroundColor = 'red';
+            else if (value <= 50) progressBar.style.backgroundColor = 'orange';
+            else if (value <= 75) progressBar.style.backgroundColor = 'yellow';
+            else progressBar.style.backgroundColor = 'green';
+        }
+
+        function resetProgress() {
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+            progressText.textContent = '';
+            convertButton.disabled = false;
+        }
+    </script>
+</body>
+</html>

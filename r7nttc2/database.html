@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submitted Data</title>
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // Firebase configuration (Replace with your actual Firebase config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchData() {
+            const querySnapshot = await getDocs(collection(db, "formData"));
+            let content = "<table border='1'><tr><th>NMIS Code</th><th>NMIS Date</th><th>Last Name</th><th>First Name</th><th>Middle Name</th><th>Extension</th><th>Address</th><th>City</th><th>Province</th><th>Region</th><th>Zip Code</th><th>PO Box</th><th>Sex</th><th>Civil Status</th><th>Contact</th><th>Telephone</th><th>Email</th><th>Fax</th><th>Employment Type</th><th>Employment Status</th><th>Birthdate</th><th>Birthplace</th><th>Citizenship</th><th>Religion</th><th>Height</th><th>Weight</th><th>Blood Type</th><th>SSS</th><th>GSIS</th><th>TIN</th><th>Distinguishing Marks</th><th>Training Institution</th><th>Qualification</th><th>NC Cert Number</th><th>NC Date Issuance</th><th>NC Validity</th><th>TM Cert Number</th><th>TM Date Issuance</th><th>TM Validity</th><th>Assessor 1</th><th>Assessor 2</th><th>Assessor 3</th></tr>";
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                content += `<tr>
+                    <td>${data.nmisCode || 'N/A'}</td>
+                    <td>${data.nmisDate || 'N/A'}</td>
+                    <td>${data.lastName || 'N/A'}</td>
+                    <td>${data.firstName || 'N/A'}</td>
+                    <td>${data.middleName || 'N/A'}</td>
+                    <td>${data.extension || 'N/A'}</td>
+                    <td>${data.address || 'N/A'}</td>
+                    <td>${data.city || 'N/A'}</td>
+                    <td>${data.province || 'N/A'}</td>
+                    <td>${data.region || 'N/A'}</td>
+                    <td>${data.zipCode || 'N/A'}</td>
+                    <td>${data.poBox || 'N/A'}</td>
+                    <td>${data.sex || 'N/A'}</td>
+                    <td>${data.civilStatus || 'N/A'}</td>
+                    <td>${data.contact || 'N/A'}</td>
+                    <td>${data.telephone || 'N/A'}</td>
+                    <td>${data.email || 'N/A'}</td>
+                    <td>${data.fax || 'N/A'}</td>
+                    <td>${data.employmentType || 'N/A'}</td>
+                    <td>${data.employmentStatus || 'N/A'}</td>
+                    <td>${data.birthdate || 'N/A'}</td>
+                    <td>${data.birthplace || 'N/A'}</td>
+                    <td>${data.citizenship || 'N/A'}</td>
+                    <td>${data.religion || 'N/A'}</td>
+                    <td>${data.height || 'N/A'}</td>
+                    <td>${data.weight || 'N/A'}</td>
+                    <td>${data.bloodType || 'N/A'}</td>
+                    <td>${data.sss || 'N/A'}</td>
+                    <td>${data.gsis || 'N/A'}</td>
+                    <td>${data.tin || 'N/A'}</td>
+                    <td>${data.distinguishingMarks || 'N/A'}</td>
+                    <td>${data.trainingInstitution || 'N/A'}</td>
+                    <td>${data.qualification || 'N/A'}</td>
+                    <td>${data.ncCertNumber || 'N/A'}</td>
+                    <td>${data.ncDateIssuance || 'N/A'}</td>
+                    <td>${data.ncValidity || 'N/A'}</td>
+                    <td>${data.tmCertNumber || 'N/A'}</td>
+                    <td>${data.tmDateIssuance || 'N/A'}</td>
+                    <td>${data.tmValidity || 'N/A'}</td>
+                    <td>${data.assessor1 || 'N/A'}</td>
+                    <td>${data.assessor2 || 'N/A'}</td>
+                    <td>${data.assessor3 || 'N/A'}</td>
+                </tr>`;
+            });
+            
+            content += "</table>";
+            document.getElementById("displayData").innerHTML = content;
+        }
+
+        window.onload = fetchData;
+    </script>
+</head>
+<body>
+    <h2>Submitted Data</h2>
+    <div id="displayData">Loading...</div>
+</body>
+</html>
