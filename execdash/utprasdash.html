@@ -713,9 +713,11 @@ body {
 
         async function fetchTotalPrograms() {
             try {
-                const response = await fetch('../r7utpras/data2.json');
+                const response = await fetch('../r7utpras/data.json');
                 const data = await response.json();
-                const totalPrograms = data.length;
+                // Get the 'Total' field from the last entry
+                const lastEntry = data[data.length - 1];
+                const totalPrograms = lastEntry && lastEntry.Total ? lastEntry.Total : 0;
                 document.getElementById('totalPrograms').textContent = totalPrograms.toLocaleString();
             } catch (error) {
                 console.error('Error fetching total programs:', error);
@@ -864,6 +866,26 @@ body {
                 button.disabled = false;
             }
         });
+
+        function countUniqueEntries(data) {
+            const seen = new Set();
+            data.forEach(row => {
+                // Create a unique key by concatenating all values from A to AA
+                let key = '';
+                for (let code = 65; code <= 65 + 26; code++) { // 65 = 'A', 65+26 = 'AA'
+                    let col = String.fromCharCode(code);
+                    if (col === 'Z') {
+                        // After Z comes AA
+                        key += (row['Z'] || '') + '|';
+                        key += (row['AA'] || '') + '|';
+                        break;
+                    }
+                    key += (row[col] || '') + '|';
+                }
+                seen.add(key);
+            });
+            return seen.size;
+        }
     </script>
 </body>
 </html>
