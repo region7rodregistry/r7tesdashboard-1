@@ -396,7 +396,7 @@
                 </div>
             </div> 
             <div class="image-holder">       
-                <img src="icons/orgchart.png" alt="NTTC MIS" class="featured-image">
+                <img src="icons/tesdabanner1.jpg" alt="NTTC MIS" class="featured-image">
             </div>
             <p class="website-link">
                 <a href="https://sites.google.com/a/tesda.gov.ph/tesda-regional-office-vii/home" 
@@ -445,113 +445,6 @@
             window.location.href = 'execdash/index.html';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImg');
-            const closeBtn = document.getElementsByClassName('close')[0];
-            const featuredImage = document.querySelector('.featured-image');
-            
-            let scale = 1;
-            let isDragging = false;
-            let startX, startY, translateX = 0, translateY = 0;
-
-            // Open modal
-            featuredImage.onclick = function() {
-                modal.style.display = 'block';
-                modalImg.src = 'icons/orgchart.png';
-                scale = 1;
-                translateX = 0;
-                translateY = 0;
-                updateTransform();
-                
-                // Force reflow
-                modal.offsetHeight;
-                
-                // Add show classes for smooth transition
-                modal.classList.add('show');
-                modalImg.classList.add('show');
-            }
-
-            // Close modal
-            closeBtn.onclick = function() {
-                modal.classList.remove('show');
-                modalImg.classList.remove('show');
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 300); // Match the transition duration
-            }
-
-            // Zoom controls
-            document.getElementById('zoomIn').onclick = function() {
-                scale *= 1.2;
-                updateTransform();
-            }
-
-            document.getElementById('zoomOut').onclick = function() {
-                scale *= 0.8;
-                updateTransform();
-            }
-
-            document.getElementById('resetZoom').onclick = function() {
-                scale = 1;
-                translateX = 0;
-                translateY = 0;
-                updateTransform();
-            }
-
-            // Drag functionality
-            modalImg.addEventListener('mousedown', startDragging);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDragging);
-
-            // Touch support
-            modalImg.addEventListener('touchstart', e => {
-                const touch = e.touches[0];
-                startDragging(touch);
-            });
-            document.addEventListener('touchmove', e => {
-                e.preventDefault();
-                const touch = e.touches[0];
-                drag(touch);
-            });
-            document.addEventListener('touchend', stopDragging);
-
-            function startDragging(e) {
-                isDragging = true;
-                startX = e.clientX - translateX;
-                startY = e.clientY - translateY;
-            }
-
-            function drag(e) {
-                if (!isDragging) return;
-                translateX = e.clientX - startX;
-                translateY = e.clientY - startY;
-                updateTransform();
-            }
-
-            function stopDragging() {
-                isDragging = false;
-            }
-
-            function updateTransform() {
-                modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-            }
-
-            // Mouse wheel zoom
-            modal.addEventListener('wheel', function(e) {
-                e.preventDefault();
-                const delta = e.deltaY * -0.01;
-                scale *= (1 + delta);
-                updateTransform();
-            });
-
-            // Close modal with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeBtn.onclick();
-                }
-            });
-        });
     </script>
 
     <div id="imageModal" class="modal">
